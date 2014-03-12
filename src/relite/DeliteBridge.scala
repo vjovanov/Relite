@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  * 
@@ -114,6 +114,19 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
       }
+//Lidija******
+case e: Sub =>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] - rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] - rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] - rhs.asInstanceOf[Rep[Double]]
+      }
+//*****
+
     case e: Mult => 
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
