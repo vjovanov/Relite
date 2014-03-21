@@ -40,6 +40,10 @@ import ppl.delite.framework.transform._
 import scala.virtualization.lms.common.StaticData
 import ppl.delite.framework.datastructures.DeliteArray
 
+//lidija*****************
+import r.nodes.ast._
+import scala.math.pow
+//***********************
 
 trait Eval extends OptiMLApplication with StaticData {
   type Env = Map[RSymbol,Rep[Any]]
@@ -177,6 +181,181 @@ case e: Sub =>
             case s => println("unknown f: " + s + " / " + args.mkString(",")); 
           }
       }
+
+
+//Lidija******************************************************************************************************************************************************
+    case e: UnaryMinus=>
+      val lhs=eval(e.getLHS, frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      lhs.tpe match{
+        case D=>(-lhs.asInstanceOf[Rep[Double])
+        case VD=>(-lhs.asInstanceOf[Rep[DenseVector[Double]]])
+      }
+      
+    case e: IntegerDiv=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val D = manifest[Integer]
+      val VD = manifest[DenseVector[Integer]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Integer]] / rhs.asInstanceOf[Rep[Integer]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Integer]]] / rhs.asInstanceOf[Rep[DenseVector[Integer]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Integer]]] / rhs.asInstanceOf[Rep[Integer]]
+      }
+      
+    case e: And=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val B = manifest[Boolean]
+      val VB = manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] && rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] && rhs.asInstanceOf[Rep[Boolean]]
+      }
+
+    case e: Or=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val B = manifest[Boolean]
+      val VB = manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] || rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] || rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] || rhs.asInstanceOf[Rep[Boolean]]
+      }
+      
+    case e:Not=>
+      val lhs=eval(e.getLHS, frame)
+      val B = manifest[Boolean]
+      val VB = manifest[DenseVector[Boolean]]
+      lhs.tpe match{
+        case B=>(!lhs.asInstanceOf[Rep[Boolean])
+        case VB=>(!lhs.asInstanceOf[Rep[DenseVector[Boolean]]])
+      }
+      
+    case e:Pow=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => pow(lhs.asInstanceOf[Rep[Double]], rhs.asInstanceOf[Rep[Double]])
+        case (VD,VD) => pow(lhs.asInstanceOf[Rep[DenseVector[Double]]], rhs.asInstanceOf[Rep[DenseVector[Double]]])
+        case (VD,D) => pow(lhs.asInstanceOf[Rep[DenseVector[Double]]], rhs.asInstanceOf[Rep[Double]])
+      }
+      
+     case e:Mod=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] % rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] % rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] % rhs.asInstanceOf[Rep[Double]]
+      }
+      
+     case e:LT=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] < rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] < rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] < rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] < rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] < rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] < rhs.asInstanceOf[Rep[Boolean]]	
+      }
+      
+      case e:LE=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] <= rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] <= rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] <= rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] <= rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] <= rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] <= rhs.asInstanceOf[Rep[Boolean]]
+      }
+      
+      case e:GT=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] > rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] > rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] > rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] > rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] > rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] > rhs.asInstanceOf[Rep[Boolean]]
+      }
+      
+      case e:GE=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] >= rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] >= rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] >= rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] >= rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] >= rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] >= rhs.asInstanceOf[Rep[Boolean]]
+      }
+      
+      case e:EQ=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] == rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] == rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] == rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] == rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] == rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] == rhs.asInstanceOf[Rep[Boolean]]
+      }
+      
+      case e:NE=>
+      val lhs = eval(e.getLHS,frame)
+      val rhs = eval(e.getRHS,frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      val B=manifest[Boolean]
+      val VB=manifest[DenseVector[Boolean]]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => lhs.asInstanceOf[Rep[Double]] != rhs.asInstanceOf[Rep[Double]]
+        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] != rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] != rhs.asInstanceOf[Rep[Double]]
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] != rhs.asInstanceOf[Rep[Boolean]]
+        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] != rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
+        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] != rhs.asInstanceOf[Rep[Boolean]]
+      }
+     
+ //***********************************************************************************************************************************************************
+
+
     case _ => 
       println("unknown: "+e+"/"+e.getClass); 
       new RLanguage(e) //RInt.RIntFactory.getScalar(42)
