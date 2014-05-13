@@ -167,17 +167,10 @@ trait Eval extends OptiMLApplication with StaticData {
          val sizeVect=e.getArgs.size()
          val v1=DenseVector[Double](e.getArgs.size(), true)
 
-
-        //while petlja se ne paralelizuje, medjutim ovo se vrti beskonacno, brojac je stalno 1, ako je: var i:Int=0
-        //ako je var i=0, onda greska za getNode: Expected Int, found Var[Int]
-         var i=0
-         while(i<sizeVect){
-          v1(i)=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
-          i=i+1
-          println("i= "+i) //debug
-         }
-         v1.pprint //debug
-         v1
+	for (i <- (0 until sizeVect)) {
+            v1(i)=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
+        }
+        v1
       
         case _ =>
           val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
