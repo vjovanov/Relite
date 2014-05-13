@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  * 
@@ -40,10 +40,6 @@ import ppl.delite.framework.transform._
 import scala.virtualization.lms.common.StaticData
 import ppl.delite.framework.datastructures.DeliteArray
 
-//lidija*****************
-import r.nodes.ast._
-import scala.math.pow
-//***********************
 
 trait Eval extends OptiMLApplication with StaticData {
   type Env = Map[RSymbol,Rep[Any]]
@@ -54,22 +50,29 @@ trait Eval extends OptiMLApplication with StaticData {
   //def fun[A,B](f: Rep[A]=>Rep[B]):Rep[A=>B]
   def nuf[A,B](f: Rep[A=>B]):Rep[A]=>Rep[B]
 
+
+
   def liftValue(v: Any): Rep[Any] = v match {
     case v: RString => unit(v.getString(0))
-    case v: ScalarIntImpl => unit(v.getInt(0))
-    case v: ScalarDoubleImpl => unit(v.getDouble(0))
+    case v: ScalarIntImpl => println("Scalar int impl!!!")
+                             unit(v.getInt(0))
+    case v: ScalarDoubleImpl => println("SCALAR DOUBLE IMPL")
+                                unit(v.getDouble(0))
     case v: IntImpl => 
       val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Int]]]
       densevector_obj_fromarray(data, true)
     case v: DoubleImpl => 
-      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]]
+      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]] //static data-dolazi od spolja
       densevector_obj_fromarray(data, true)
+    case v: RLogical => unit(v.getLogical(0)) //unit vraca cvor, getLogical vraca int
+    //    case v: ScalarLogicalImpl => unit(v.getLogical(0))
   }
 
   def convertBack(x: Any): AnyRef = x match {
     case x: String => RString.RStringFactory.getScalar(x)
     case x: Int => RInt.RIntFactory.getScalar(x)
     case x: Double => RDouble.RDoubleFactory.getScalar(x)
+ //   case x: Boolean => RLogical.RLogicalFactory.getScalar(x)
     // struct classes are generated on the fly. we cannot acces them yet.
     case x if x.getClass.getName == "generated.scala.DenseVectorInt" => RInt.RIntFactory.getFor(x.asInstanceOf[{val _data: Array[Int]}]._data)
     case x if x.getClass.getName == "generated.scala.DenseVectorDouble" => RDouble.RDoubleFactory.getFor(x.asInstanceOf[{val _data: Array[Double]}]._data)
@@ -80,7 +83,9 @@ trait Eval extends OptiMLApplication with StaticData {
 
   def evalFun[A:Manifest,B:Manifest](e: ASTNode, frame: Frame): Rep[A] => Rep[B] = e match {
     case e: Function => 
-      { x: Rep[A] => 
+      { 
+	println("USAO JE OVDE")
+	x: Rep[A] => 
         val ex = RContext.createRootNode(e,null).execute(frame)
         ex match {
           case ex: ClosureImpl =>
@@ -95,20 +100,22 @@ trait Eval extends OptiMLApplication with StaticData {
   }
 
   def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
-    case e: Constant => liftValue(e.getValue )
-    case e: SimpleAssignVariable => 
+    case e: Constant => println("CONSTANT NODE")
+			liftValue(e.getValue )
+    case e: SimpleAssignVariable => println("SIMPLE ASSIGN VARIABLE")
       val lhs = e.getSymbol
       val rhs = eval(e.getExpr,frame)
       env = env.updated(lhs,rhs)
-    case e: SimpleAccessVariable => 
+    case e: SimpleAccessVariable =>
+      println("SIMPLE ACCESS VARIABLE JEEEEE") 
       val lhs = e.getSymbol
       env.getOrElse(lhs, {
         val ex = RContext.createRootNode(e,null).execute(frame)
         liftValue(ex)
       })
-    case e: Sequence => 
+    case e: Sequence => println("SEQUENCE")
       e.getExprs.map(g => eval(g,frame)).last
-    case e: Add => 
+    case e: Add => println("ADD")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -118,20 +125,7 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
       }
-//Lidija******
-case e: Sub =>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] - rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] - rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] - rhs.asInstanceOf[Rep[Double]]
-      }
-//*****
-
-    case e: Mult => 
+    case e: Mult => println("MULT")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -141,7 +135,7 @@ case e: Sub =>
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[Double]]
       }
-    case e: Div => 
+    case e: Div => println("DIV")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -151,7 +145,7 @@ case e: Sub =>
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[Double]]
       }
-    case e: Colon => 
+    case e: Colon => println("COLON")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -160,200 +154,118 @@ case e: Sub =>
         case (D,D) => 
           indexvector_range(lhs.asInstanceOf[Rep[Double]].toInt,rhs.asInstanceOf[Rep[Double]].toInt+1).toDouble
       }
-    case e: FunctionCall => 
+
+    case e: AccessVector=>println("ACCESS VECTOR")
+
+    case e: FunctionCall => println("FUNCTION CALL")
       e.getName.toString match {
-        case "map" | "sapply" =>
+        case "map" | "sapply" => println("MAP|SAPPLY")
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
           v.map(f)
-        case "sum" =>
+        case "sum" => println("SUM")
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           v.sum
+
+
+//**************************************************START-kreiranje vektora*********************************************************************
+	
+	     case "c" =>
+	       println("VECTOR CREATION")  
+         val first=eval(e.getArgs.getNode(0), frame)
+         val sizeVect=e.getArgs.size()
+         val v1=DenseVector[Double](e.getArgs.size(), true)
+    
+         
+      //for petlja se paralelizuje, pa ni vrednost brojaca i nije safe
+      /* 
+          var i:Int=0
+          for(v<-v1){
+            val tmp=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
+            v1(i)=tmp
+            println("BROJ: "+tmp)
+            i=i+1
+            println("i="+i)
+         }
+      */
+
+        //while petlja se ne paralelizuje, medjutim ovo se vrti beskonacno, brojac je stalno 1, ako je: var i:Int=0
+        //ako je var i=0, onda greska za getNode: Expected Int, found Var[Int]
+         var i=0
+         while(i<sizeVect){
+          v1(i)=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
+          i=i+1
+          println("i= "+i)
+         }
+         v1.pprint
+         v1
+      
+//**************************************************END - kreiranje vektora**********************************************************************
+
+
         case _ =>
           val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
           (e.getName.toString,args) match {
             case ("Vector.rand",(n:Rep[Double])::Nil) => 
               assert(n.tpe == manifest[Double])
               Vector.rand(n.toInt)
-            case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
-              assert(v.tpe == manifest[DenseVector[Double]])
+/*	    case ("pprint", (v:Rep[Int])::Nil) =>
+      //  assert(v.tpe == manifest[Int])
+        println("Evo ga "+v)
+      case ("pprint", (v:Rep[Double])::Nil) =>
+	       assert(v.tpe == manifest[Double])
+	      println(v)
+	    case ("pprint", (v:Rep[Boolean])::Nil) =>
+	      assert(v.tpe == manifest[Boolean])
+	      println(v)
+  */          case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
+            //  assert(v.tpe == manifest[DenseVector[Double]])
+              println("HERE IS")
               v.pprint
+	    
             case s => println("unknown f: " + s + " / " + args.mkString(",")); 
           }
       }
 
 
-//Lidija******************************************************************************************************************************************************
-    case e: UnaryMinus=>
+//************************************************START***********************************************************************
+     case e: UnaryMinus=> println("UNARY MINUS")
       val lhs=eval(e.getLHS, frame)
       val D = manifest[Double]
       val VD = manifest[DenseVector[Double]]
       lhs.tpe match{
-        case D=>(-lhs.asInstanceOf[Rep[Double])
-        case VD=>(-lhs.asInstanceOf[Rep[DenseVector[Double]]])
-      }
-      
-    case e: IntegerDiv=>
-      val lhs=eval(e.getLHS, frame)
-      val rhs=eval(e.getRHS, frame)
-      val D = manifest[Integer]
-      val VD = manifest[DenseVector[Integer]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Integer]] / rhs.asInstanceOf[Rep[Integer]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Integer]]] / rhs.asInstanceOf[Rep[DenseVector[Integer]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Integer]]] / rhs.asInstanceOf[Rep[Integer]]
-      }
-      
-    case e: And=>
-      val lhs=eval(e.getLHS, frame)
-      val rhs=eval(e.getRHS, frame)
-      val B = manifest[Boolean]
-      val VB = manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] && rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] && rhs.asInstanceOf[Rep[Boolean]]
+        case D=>(-1*lhs.asInstanceOf[Rep[Double]])
+        //case VD=>(lhs.asInstanceOf[Rep[DenseVector[Double]]])
       }
 
-    case e: Or=>
-      val lhs=eval(e.getLHS, frame)
-      val rhs=eval(e.getRHS, frame)
-      val B = manifest[Boolean]
-      val VB = manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] || rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] || rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] || rhs.asInstanceOf[Rep[Boolean]]
+    case e: Function=>
+	    println("FUNCTION NODE")
+    //  val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
+
+    case e: If=>
+	    println("IF NODE")
+      val cond=eval(e.getCond, frame)
+      val B=manifest[Int]
+      cond.tpe match{
+        case B=> if(cond==1){ println("TRUE CASE"); eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]] }
+                 else{ println("FALSE CASE");eval(e.getFalseCase, frame).asInstanceOf[Rep[Any]]}
       }
-      
+
     case e:Not=>
+      println("NOT NODE")
       val lhs=eval(e.getLHS, frame)
-      val B = manifest[Boolean]
-      val VB = manifest[DenseVector[Boolean]]
+      val B = manifest[Int]
+  //    val VB = manifest[DenseVector[Int]]
       lhs.tpe match{
-        case B=>(!lhs.asInstanceOf[Rep[Boolean])
-        case VB=>(!lhs.asInstanceOf[Rep[DenseVector[Boolean]]])
-      }
-      
-    case e:Pow=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => pow(lhs.asInstanceOf[Rep[Double]], rhs.asInstanceOf[Rep[Double]])
-        case (VD,VD) => pow(lhs.asInstanceOf[Rep[DenseVector[Double]]], rhs.asInstanceOf[Rep[DenseVector[Double]]])
-        case (VD,D) => pow(lhs.asInstanceOf[Rep[DenseVector[Double]]], rhs.asInstanceOf[Rep[Double]])
-      }
-      
-     case e:Mod=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] % rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] % rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] % rhs.asInstanceOf[Rep[Double]]
-      }
-      
-     case e:LT=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] < rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] < rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] < rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] < rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] < rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] < rhs.asInstanceOf[Rep[Boolean]]	
-      }
-      
-      case e:LE=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] <= rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] <= rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] <= rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] <= rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] <= rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] <= rhs.asInstanceOf[Rep[Boolean]]
-      }
-      
-      case e:GT=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] > rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] > rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] > rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] > rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] > rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] > rhs.asInstanceOf[Rep[Boolean]]
-      }
-      
-      case e:GE=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] >= rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] >= rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] >= rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] >= rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] >= rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] >= rhs.asInstanceOf[Rep[Boolean]]
-      }
-      
-      case e:EQ=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] == rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] == rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] == rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] == rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] == rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] == rhs.asInstanceOf[Rep[Boolean]]
-      }
-      
-      case e:NE=>
-      val lhs = eval(e.getLHS,frame)
-      val rhs = eval(e.getRHS,frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      val B=manifest[Boolean]
-      val VB=manifest[DenseVector[Boolean]]
-      (lhs.tpe,rhs.tpe) match {
-        case (D,D) => lhs.asInstanceOf[Rep[Double]] != rhs.asInstanceOf[Rep[Double]]
-        case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] != rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] != rhs.asInstanceOf[Rep[Double]]
-        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] != rhs.asInstanceOf[Rep[Boolean]]
-        case (VB,VB) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] != rhs.asInstanceOf[Rep[DenseVector[Boolean]]]
-        case (VB,B) => lhs.asInstanceOf[Rep[DenseVector[Boolean]]] != rhs.asInstanceOf[Rep[Boolean]]
-      }
-     
- //***********************************************************************************************************************************************************
+        case B=> (lhs.asInstanceOf[Rep[Int]]+1) % 2
+  /*    case VB=> 
+		        val vect=lhs.asInstanceOf[Rep[DenseVector[Int]]]
+	  	      for (vec <- vect) {
+                  vec=(vec+1)%2
+          	}
+  */      
+	}
+//**********************************************END**************************************************************************
 
 
     case _ => 
