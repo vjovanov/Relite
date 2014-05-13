@@ -1,24 +1,24 @@
 /*
-* Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Affero General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
+ * Copyright (c) 2013 Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU Affero General Public License for more details.
-*
-* You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see http://www.gnu.org/licenses/agpl.html.
-*
-* Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
-* or visit www.oracle.com if you need additional information or have any
-* questions.
-*/
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/agpl.html.
+ * 
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
 package relite
 
 import r._
@@ -50,33 +50,42 @@ trait Eval extends OptiMLApplication with StaticData {
   //def fun[A,B](f: Rep[A]=>Rep[B]):Rep[A=>B]
   def nuf[A,B](f: Rep[A=>B]):Rep[A]=>Rep[B]
 
+
+
   def liftValue(v: Any): Rep[Any] = v match {
     case v: RString => unit(v.getString(0))
-    case v: ScalarIntImpl => unit(v.getInt(0))
-    case v: ScalarDoubleImpl => unit(v.getDouble(0))
-    case v: IntImpl =>
+    case v: ScalarIntImpl => println("SCALAR DOUBLE IMPL")
+                             unit(v.getInt(0))
+    case v: ScalarDoubleImpl => println("SCALAR DOUBLE IMPL")
+                                unit(v.getDouble(0))
+    case v: IntImpl => 
       val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Int]]]
       densevector_obj_fromarray(data, true)
-    case v: DoubleImpl =>
-      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]]
+    case v: DoubleImpl => 
+      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]] //static data-dolazi od spolja
       densevector_obj_fromarray(data, true)
+    case v: RLogical => unit(v.getLogical(0)) //unit vraca cvor, getLogical vraca int
+    //    case v: ScalarLogicalImpl => unit(v.getLogical(0))
   }
 
   def convertBack(x: Any): AnyRef = x match {
     case x: String => RString.RStringFactory.getScalar(x)
     case x: Int => RInt.RIntFactory.getScalar(x)
     case x: Double => RDouble.RDoubleFactory.getScalar(x)
+ //   case x: Boolean => RLogical.RLogicalFactory.getScalar(x)
     // struct classes are generated on the fly. we cannot acces them yet.
     case x if x.getClass.getName == "generated.scala.DenseVectorInt" => RInt.RIntFactory.getFor(x.asInstanceOf[{val _data: Array[Int]}]._data)
     case x if x.getClass.getName == "generated.scala.DenseVectorDouble" => RDouble.RDoubleFactory.getFor(x.asInstanceOf[{val _data: Array[Double]}]._data)
-// case x: generated.scala.DenseVectorDouble => RDouble.RDoubleFactory.getFor(x._data)
+//    case x: generated.scala.DenseVectorDouble => RDouble.RDoubleFactory.getFor(x._data)
     case () => RInt.RIntFactory.getScalar(0)
   }
 
 
   def evalFun[A:Manifest,B:Manifest](e: ASTNode, frame: Frame): Rep[A] => Rep[B] = e match {
-    case e: Function =>
-      { x: Rep[A] =>
+    case e: Function => 
+      { 
+	println("USAO JE OVDE")
+	x: Rep[A] => 
         val ex = RContext.createRootNode(e,null).execute(frame)
         ex match {
           case ex: ClosureImpl =>
@@ -91,20 +100,22 @@ trait Eval extends OptiMLApplication with StaticData {
   }
 
   def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
-    case e: Constant => liftValue(e.getValue )
-    case e: SimpleAssignVariable =>
+    case e: Constant => println("CONSTANT NODE")
+			liftValue(e.getValue )
+    case e: SimpleAssignVariable => println("SIMPLE ASSIGN VARIABLE")
       val lhs = e.getSymbol
       val rhs = eval(e.getExpr,frame)
       env = env.updated(lhs,rhs)
     case e: SimpleAccessVariable =>
+      println("SIMPLE ACCESS VARIABLE JEEEEE") 
       val lhs = e.getSymbol
       env.getOrElse(lhs, {
         val ex = RContext.createRootNode(e,null).execute(frame)
         liftValue(ex)
       })
-    case e: Sequence =>
+    case e: Sequence => println("SEQUENCE")
       e.getExprs.map(g => eval(g,frame)).last
-    case e: Add =>
+    case e: Add => println("ADD")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -114,7 +125,7 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
       }
-    case e: Mult =>
+    case e: Mult => println("MULT")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -124,7 +135,7 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[Double]]
       }
-    case e: Div =>
+    case e: Div => println("DIV")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
@@ -134,38 +145,131 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[Double]]
       }
-    case e: Colon =>
+    case e: Colon => println("COLON")
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
       val VD = manifest[DenseVector[Double]]
       (lhs.tpe,rhs.tpe) match {
-        case (D,D) =>
+        case (D,D) => 
           indexvector_range(lhs.asInstanceOf[Rep[Double]].toInt,rhs.asInstanceOf[Rep[Double]].toInt+1).toDouble
       }
-    case e: FunctionCall =>
+
+    case e: AccessVector=>println("ACCESS VECTOR")
+
+    case e: FunctionCall => println("FUNCTION CALL")
       e.getName.toString match {
-        case "map" | "sapply" =>
+        case "map" | "sapply" => println("MAP|SAPPLY")
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
           v.map(f)
-        case "sum" =>
+        case "sum" => println("SUM")
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           v.sum
+
+
+//**************************************************START-kreiranje vektora*********************************************************************
+	
+	     case "c" =>
+	       println("VECTOR CREATION")  
+         val first=eval(e.getArgs.getNode(0), frame)
+         val sizeVect=e.getArgs.size()
+         val v1=DenseVector[Double](e.getArgs.size(), true)
+    
+         
+      //for petlja se paralelizuje, pa ni vrednost brojaca i nije safe
+      /* 
+          var i:Int=0
+          for(v<-v1){
+            val tmp=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
+            v1(i)=tmp
+            println("BROJ: "+tmp)
+            i=i+1
+            println("i="+i)
+         }
+      */
+
+        //while petlja se ne paralelizuje, medjutim ovo se vrti beskonacno, brojac je stalno 1, ako je: var i:Int=0
+        //ako je var i=0, onda greska za getNode: Expected Int, found Var[Int]
+         var i=0
+         while(i<sizeVect){
+          v1(i)=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
+          i=i+1
+          println("i= "+i)
+         }
+         v1.pprint
+         v1
+      
+//**************************************************END - kreiranje vektora**********************************************************************
+
+
         case _ =>
           val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
           (e.getName.toString,args) match {
-            case ("Vector.rand",(n:Rep[Double])::Nil) =>
+            case ("Vector.rand",(n:Rep[Double])::Nil) => 
               assert(n.tpe == manifest[Double])
               Vector.rand(n.toInt)
-            case ("pprint",(v:Rep[DenseVector[Double]])::Nil) =>
-              assert(v.tpe == manifest[DenseVector[Double]])
+/*	    case ("pprint", (v:Rep[Int])::Nil) =>
+      //  assert(v.tpe == manifest[Int])
+        println("Evo ga "+v)
+      case ("pprint", (v:Rep[Double])::Nil) =>
+	       assert(v.tpe == manifest[Double])
+	      println(v)
+	    case ("pprint", (v:Rep[Boolean])::Nil) =>
+	      assert(v.tpe == manifest[Boolean])
+	      println(v)
+  */          case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
+            //  assert(v.tpe == manifest[DenseVector[Double]])
+              println("HERE IS")
               v.pprint
-            case s => println("unknown f: " + s + " / " + args.mkString(","));
+	    
+            case s => println("unknown f: " + s + " / " + args.mkString(",")); 
           }
       }
-    case _ =>
-      println("unknown: "+e+"/"+e.getClass);
+
+
+//************************************************START***********************************************************************
+     case e: UnaryMinus=> println("UNARY MINUS")
+      val lhs=eval(e.getLHS, frame)
+      val D = manifest[Double]
+      val VD = manifest[DenseVector[Double]]
+      lhs.tpe match{
+        case D=>(-1*lhs.asInstanceOf[Rep[Double]])
+        //case VD=>(lhs.asInstanceOf[Rep[DenseVector[Double]]])
+      }
+
+    case e: Function=>
+	    println("FUNCTION NODE")
+    //  val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
+
+    case e: If=>
+	    println("IF NODE")
+      val cond=eval(e.getCond, frame)
+      val B=manifest[Int]
+      cond.tpe match{
+        case B=> if(cond==1){ println("TRUE CASE"); eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]] }
+                 else{ println("FALSE CASE");eval(e.getFalseCase, frame).asInstanceOf[Rep[Any]]}
+      }
+
+    case e:Not=>
+      println("NOT NODE")
+      val lhs=eval(e.getLHS, frame)
+      val B = manifest[Int]
+  //    val VB = manifest[DenseVector[Int]]
+      lhs.tpe match{
+        case B=> (lhs.asInstanceOf[Rep[Int]]+1) % 2
+  /*    case VB=> 
+		        val vect=lhs.asInstanceOf[Rep[DenseVector[Int]]]
+	  	      for (vec <- vect) {
+                  vec=(vec+1)%2
+          	}
+  */      
+	}
+//**********************************************END**************************************************************************
+
+
+    case _ => 
+      println("unknown: "+e+"/"+e.getClass); 
       new RLanguage(e) //RInt.RIntFactory.getScalar(42)
       42
   }
@@ -193,7 +297,7 @@ trait LoopTransformer extends ForwardPassTransformer with OptiMLCodeGenScala {
 
   stream = new PrintWriter(System.out)
   override def traverseStm(stm: Stm) = stm match {
-    case TTP(sym, mhs, rhs: AbstractFatLoop) =>
+    case TTP(sym, mhs, rhs: AbstractFatLoop) => 
       (sym,mhs).zipped.foreach((s,p) => traverseStm(TP(s,p)))
     case _ =>
       super[ForwardPassTransformer].traverseStm(stm)
@@ -205,14 +309,14 @@ trait PrefixSumTransformer extends LoopTransformer {
   import IR._
 
   override def traverseStm(stm: Stm) = stm match {
-    case TTP(sym::Nil, mhs, outer: AbstractFatLoop) =>
+    case TTP(sym::Nil, mhs, outer: AbstractFatLoop) => 
       outer.body match {
         case (body: DeliteCollectElem[a,i,ca])::Nil if body.cond.isEmpty =>
           implicit val (ma,mi,mca) = (body.mA, body.mI, body.mCA)
-          def loopVarUsedIn(bs: List[Block[Any]], vy: Sym[Any]) =
+          def loopVarUsedIn(bs: List[Block[Any]], vy: Sym[Any]) = 
             getFreeVarBlock(Block(Combine(bs.map(getBlockResultFull))),vy::Nil).contains(outer.v)
           getBlockResult(body.func) match {
-            case Def(Forward(Def(Loop(Def(IntPlus(Const(1), outer.v)), vy, bodyr: DeliteReduceElem[a]))))
+            case Def(Forward(Def(Loop(Def(IntPlus(Const(1), outer.v)), vy, bodyr: DeliteReduceElem[a])))) 
             if bodyr.cond.isEmpty && !loopVarUsedIn(bodyr.zero::bodyr.func::bodyr.rFunc::Nil, vy) =>
               implicit val ma = bodyr.mA
 
@@ -221,8 +325,8 @@ trait PrefixSumTransformer extends LoopTransformer {
                 val zero = reflectBlock(bodyr.zero)
 
                 def fold(i: Rep[Int], e: Rep[a]): Rep[a] = {
-                  val a = withSubstScope(vy -> i) { reflectBlock(bodyr.func) }
-                  withSubstScope(bodyr.rV._1 -> e, bodyr.rV._2 -> a) { reflectBlock(bodyr.rFunc) }
+                  val a = withSubstScope(vy -> i)                      { reflectBlock(bodyr.func)  }
+                  withSubstScope(bodyr.rV._1 -> e, bodyr.rV._2 -> a)   { reflectBlock(bodyr.rFunc) }
                 }
 
                 def update(i: Rep[Int], e: Exp[a]) =
@@ -269,20 +373,20 @@ object DeliteBridge {
         val ast = expr.getAST()
 
         val ast1:AnyRef = ast // apparently ASTNode member fields are reassigned -- don't make it look like one!
-        new BaseR(call) {
+        new BaseR(call) { 
           def execute(frame: Frame): AnyRef = {
             val ast = ast1.asInstanceOf[ASTNode]
             println("delite input: "+ast)
 
             val runner = new EvalRunner {}
-            runner.program = { x =>
+            runner.program = { x => 
               val res = runner.eval(ast, null)
               runner.setResult(res)
             }
             DeliteRunner.compileAndTest(runner)
             runner.getResult
           }
-        }
+        } 
       }
     }
 
@@ -296,7 +400,7 @@ object DeliteBridge {
         //val ast = expr.getAST()
 
         //val ast1:AnyRef = ast // apparently ASTNode member fields are reassigned -- don't make it look like one!
-        new BaseR(call) {
+        new BaseR(call) { 
           def execute(frame: Frame): AnyRef = {
             val t0 = System.currentTimeMillis()
             val res = expr.execute(frame)
