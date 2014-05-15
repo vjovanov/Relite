@@ -62,6 +62,7 @@ trait Eval extends OptiMLApplication with StaticData {
     case v: DoubleImpl => 
       val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]] 
       densevector_obj_fromarray(data, true)
+    //representing boolean
     case v: RLogical => val intLogicalVal=v.getLogical(0)
                         if(intLogicalVal==1) unit(true) else unit(false)
   }
@@ -81,7 +82,6 @@ trait Eval extends OptiMLApplication with StaticData {
   def evalFun[A:Manifest,B:Manifest](e: ASTNode, frame: Frame): Rep[A] => Rep[B] = e match {
     case e: Function => 
       { 
-	println("USAO JE OVDE")
 	x: Rep[A] => 
         val ex = RContext.createRootNode(e,null).execute(frame)
         ex match {
@@ -187,7 +187,7 @@ trait Eval extends OptiMLApplication with StaticData {
           }
       }
 
-
+     //just for single double for now
      case e: UnaryMinus=> 
       val lhs=eval(e.getLHS, frame)
       val D = manifest[Double]
@@ -201,7 +201,7 @@ trait Eval extends OptiMLApplication with StaticData {
     case e: Function=>
       val f = evalFun[Double,Double](e, frame)
 
-
+     //if node - with or witouth else
      case e: If=>
       val cond=eval(e.getCond, frame)
       val B=manifest[Boolean]
@@ -210,11 +210,12 @@ trait Eval extends OptiMLApplication with StaticData {
                  else{  
                   val falseCase:ASTNode=e.getFalseCase
                   val fc=scala.Option(falseCase)
-                  if(fc.isEmpty){ println("") }  
+                  if(fc.isEmpty){ println("") }  //this output should be replaced
                   else{ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
                }
       }
 
+    //not node-just for single boolean, for now
     case e:Not=>
       val lhs=eval(e.getLHS, frame)
       val B = manifest[Boolean]
