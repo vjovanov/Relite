@@ -62,7 +62,8 @@ trait Eval extends OptiMLApplication with StaticData {
     case v: DoubleImpl => 
       val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]] 
       densevector_obj_fromarray(data, true)
-    case v: RLogical => unit(v.getLogical(0)) //unit returns Int
+    case v: RLogical => val intLogicalVal=v.getLogical(0)
+                        if(intLogicalVal==1) unit(true) else unit(false)
   }
 
   def convertBack(x: Any): AnyRef = x match {
@@ -180,7 +181,6 @@ trait Eval extends OptiMLApplication with StaticData {
               Vector.rand(n.toInt)
           case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
               assert(v.tpe == manifest[DenseVector[Double]])
-              println("HERE IS")
               v.pprint
 	    
             case s => println("unknown f: " + s + " / " + args.mkString(",")); 
@@ -194,29 +194,33 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       lhs.tpe match{
         case D=>(-1*lhs.asInstanceOf[Rep[Double]])
-        //case VD=>(lhs.asInstanceOf[Rep[DenseVector[Double]]])
       }
 
-    case e: Function=>
-	   
 
-    case e: If=>
+    //not finished yet
+    case e: Function=>
+      val f = evalFun[Double,Double](e, frame)
+
+
+     case e: If=>
       val cond=eval(e.getCond, frame)
-      val B=manifest[Int]
+      val B=manifest[Boolean]
       cond.tpe match{
-        case B=> if(cond==1){ println("TRUE CASE"); eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]] } //debug
-                 else{ println("FALSE CASE");eval(e.getFalseCase, frame).asInstanceOf[Rep[Any]]} //debug
+        case B=> if(cond.asInstanceOf[Rep[Boolean]]){ eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; }
+                 else{  
+                  val falseCase:ASTNode=e.getFalseCase
+                  val fc=scala.Option(falseCase)
+                  if(fc.isEmpty){ println("") }  
+                  else{ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
+               }
       }
 
     case e:Not=>
       val lhs=eval(e.getLHS, frame)
-      val B = manifest[Int]
-  //    val VB = manifest[DenseVector[Int]]
+      val B = manifest[Boolean]
       lhs.tpe match{
-        case B=> (lhs.asInstanceOf[Rep[Int]]+1) % 2
-      
-	}
-
+        case B=> !lhs.asInstanceOf[Rep[Boolean]]
+        
     case _ => 
       println("unknown: "+e+"/"+e.getClass); 
       new RLanguage(e) //RInt.RIntFactory.getScalar(42)
