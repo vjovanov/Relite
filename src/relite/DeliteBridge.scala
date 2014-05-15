@@ -221,6 +221,25 @@ trait Eval extends OptiMLApplication with StaticData {
       val B = manifest[Boolean]
       lhs.tpe match{
         case B=> !lhs.asInstanceOf[Rep[Boolean]]
+      
+      
+     //elementwise and - just for simple boolean values, not vectors, for now   
+     case e: ElementwiseAnd=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val B = manifest[Boolean]
+      (lhs.tpe,rhs.tpe) match {
+        case (B,B) => (lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]]).asInstanceOf[Rep[Boolean]]
+      }
+
+    //elementwise or - just for simple boolean values, not vectors, for now   
+    case e: ElementwiseOr=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val B = manifest[Boolean]
+      (lhs.tpe,rhs.tpe) match {
+        case (B,B) => lhs.asInstanceOf[Rep[Boolean]] || rhs.asInstanceOf[Rep[Boolean]]
+      }
         
     case _ => 
       println("unknown: "+e+"/"+e.getClass); 
