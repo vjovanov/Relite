@@ -247,7 +247,7 @@ trait Eval extends OptiMLApplication with StaticData {
       42
   }
 }
-
+  
 class EvalRunner extends MainDeliteRunner with Eval { self =>
   //case class Lam[A,B](f: Rep[A]=>Rep[B]) extends Def[A=>B]
   //override def fun[A:Manifest,B:Manifest](f: Rep[A]=>Rep[B]):Rep[A=>B] = Lam(f)
