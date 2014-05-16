@@ -240,6 +240,16 @@ trait Eval extends OptiMLApplication with StaticData {
       (lhs.tpe,rhs.tpe) match {
         case (B,B) => lhs.asInstanceOf[Rep[Boolean]] || rhs.asInstanceOf[Rep[Boolean]]
       }
+      
+    
+    //integer division - just for simple values for now
+    case e: IntegerDiv=>
+      val lhs=eval(e.getLHS, frame)
+      val rhs=eval(e.getRHS, frame)
+      val D = manifest[Double]
+      (lhs.tpe,rhs.tpe) match {
+        case (D,D) => (lhs.asInstanceOf[Rep[Double]] / rhs.asInstanceOf[Rep[Double]]).toInt.asInstanceOf[Rep[Int]]
+      }
         
     case _ => 
       println("unknown: "+e+"/"+e.getClass); 
