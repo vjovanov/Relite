@@ -64,7 +64,7 @@ trait Eval extends OptiMLApplication with StaticData {
       densevector_obj_fromarray(data, true)
     //representing boolean
     case v: RLogical => val intLogicalVal=v.getLogical(0)
-                        if(intLogicalVal==1) unit(true) else unit(false)
+                        if(intLogicalVal==1) unit(true) else unit(false) 
   }
 
   def convertBack(x: Any): AnyRef = x match {
@@ -164,14 +164,14 @@ trait Eval extends OptiMLApplication with StaticData {
 
 	//Vector creation
 	case "c" =>
-         val first=eval(e.getArgs.getNode(0), frame)
-         val sizeVect=e.getArgs.size()
-         val v1=DenseVector[Double](e.getArgs.size(), true)
+          val first=eval(e.getArgs.getNode(0), frame)
+          val sizeVect=e.getArgs.size()
+          val v1=DenseVector[Double](e.getArgs.size(), true)
 
-	for (i <- (0 until sizeVect)) {
+ 	  for (i <- (0 until sizeVect)) {
             v1(i)=eval(e.getArgs.getNode(i),frame).asInstanceOf[Rep[Double]]
-        }
-        v1
+          }
+          v1
       
         case _ =>
           val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
@@ -189,12 +189,12 @@ trait Eval extends OptiMLApplication with StaticData {
 
      //just for single double for now
      case e: UnaryMinus=> 
-      val lhs=eval(e.getLHS, frame)
-      val D = manifest[Double]
-      val VD = manifest[DenseVector[Double]]
-      lhs.tpe match{
-        case D=>(-1*lhs.asInstanceOf[Rep[Double]])
-      }
+       val lhs=eval(e.getLHS, frame)
+       val D = manifest[Double]
+       val VD = manifest[DenseVector[Double]]
+       lhs.tpe match{
+         case D=>(-1*lhs.asInstanceOf[Rep[Double]])
+       }
 
 
     //not finished yet
@@ -203,16 +203,16 @@ trait Eval extends OptiMLApplication with StaticData {
 
      //if node - with or witouth else
      case e: If=>
-      val cond=eval(e.getCond, frame)
-      val B=manifest[Boolean]
-      cond.tpe match{
-        case B=> if(cond.asInstanceOf[Rep[Boolean]]){ eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; }
-                 else{  
-                  val falseCase:ASTNode=e.getFalseCase
-                  val fc=scala.Option(falseCase)
-                  if(fc.isEmpty){ println("") }  //this output should be replaced
-                  else{ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
-               }
+       val cond=eval(e.getCond, frame)
+       val B=manifest[Boolean]
+       cond.tpe match{
+         case B=> if(cond.asInstanceOf[Rep[Boolean]]){ eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; }
+                  else{  
+                    val falseCase:ASTNode=e.getFalseCase
+                    val fc=scala.Option(falseCase)
+                    if(fc.isEmpty){ println("") }  //this output should be replaced
+                    else{ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
+                 }
       }
 
     //not node-just for single boolean, for now
@@ -225,12 +225,12 @@ trait Eval extends OptiMLApplication with StaticData {
       
      //elementwise and - just for simple boolean values, not vectors, for now   
      case e: ElementwiseAnd=>
-      val lhs=eval(e.getLHS, frame)
-      val rhs=eval(e.getRHS, frame)
-      val B = manifest[Boolean]
-      (lhs.tpe,rhs.tpe) match {
-        case (B,B) => (lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]]).asInstanceOf[Rep[Boolean]]
-      }
+       val lhs=eval(e.getLHS, frame)
+       val rhs=eval(e.getRHS, frame)
+       val B = manifest[Boolean]
+       (lhs.tpe,rhs.tpe) match {
+         case (B,B) => (lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]]).asInstanceOf[Rep[Boolean]]
+       }
 
     //elementwise or - just for simple boolean values, not vectors, for now   
     case e: ElementwiseOr=>
