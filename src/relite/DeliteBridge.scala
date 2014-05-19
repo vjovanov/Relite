@@ -187,6 +187,14 @@ trait Eval extends OptiMLApplication with StaticData {
           }
       }
 
+     //just for vectors of double
+     case e:OuterMult=>val firstVect=eval(e.getLHS, frame)
+                       val secondVect=eval(e.getRHS, frame)
+                       val VD = manifest[DenseVector[Double]]
+                       (firstVect.tpe,secondVect.tpe) match {
+                          case (VD,VD) =>(firstVect.asInstanceOf[Rep[DenseVector[Double]]] ** secondVect.asInstanceOf[Rep[DenseVector[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]                
+                        }
+
      //just for single double for now
      case e: UnaryMinus=> 
        val lhs=eval(e.getLHS, frame)
