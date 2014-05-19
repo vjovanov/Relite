@@ -187,13 +187,25 @@ trait Eval extends OptiMLApplication with StaticData {
           }
       }
 
-     //just for vectors of double
+     //vectors outer product, just for vectors of double for now
      case e:OuterMult=>val firstVect=eval(e.getLHS, frame)
-                       val secondVect=eval(e.getRHS, frame)
-                       val VD = manifest[DenseVector[Double]]
-                       (firstVect.tpe,secondVect.tpe) match {
-                          case (VD,VD) =>(firstVect.asInstanceOf[Rep[DenseVector[Double]]] ** secondVect.asInstanceOf[Rep[DenseVector[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]                
-                        }
+       val secondVect=eval(e.getRHS, frame)
+       val VD = manifest[DenseVector[Double]]
+       (firstVect.tpe,secondVect.tpe) match {
+         case (VD,VD) =>(firstVect.asInstanceOf[Rep[DenseVector[Double]]] ** secondVect.asInstanceOf[Rep[DenseVector[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]                
+       }
+             
+             
+      //matrix multiplication, just for double for now                  
+      case e:MatMult=>
+        val matr1=eval(e.getLHS, frame)
+        val matr2=eval(e.getRHS, frame)
+        val VD=manifest[DenseMatrix[Double]]
+        (matr1.tpe, matr2.tpe) match{
+          case(VD, VD)=> (matr1.asInstanceOf[Rep[DenseMatrix[Double]]] *:* matr2.asInstanceOf[Rep[DenseMatrix[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]] 
+
+        }
+
 
      //just for single double for now
      case e: UnaryMinus=> 
