@@ -230,8 +230,8 @@ trait Eval extends OptiMLApplication with StaticData {
                   else{  
                     val falseCase:ASTNode=e.getFalseCase
                     val fc=scala.Option(falseCase)
-                    if(fc.isEmpty){ println("") }  //this output should be replaced
-                    else{ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
+                    if(!fc.isEmpty){ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
+                    else(unit(()))
                  }
       }
 
