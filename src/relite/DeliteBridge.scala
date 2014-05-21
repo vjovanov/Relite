@@ -234,6 +234,40 @@ trait Eval extends OptiMLApplication with StaticData {
                     else(unit(()))
                  }
       }
+      
+      //access double value vector node
+      case e: AccessVector=>
+        val vect=eval(e.getVector, frame)
+        val arg=eval(e.getArgs.getNode(0), frame)
+        val VD=manifest[DenseVector[Double]]
+        val D=manifest[Double]
+        (vect.tpe) match{
+          case VD=>
+            (arg.tpe) match{
+              case D=> 
+                     var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+                     vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
+          }
+      }
+      
+      
+      //update double value vector node
+      case e:UpdateVector=>
+        val accessVector=e.getVector
+        val vect=eval(accessVector.getVector, frame)
+        val arg=eval(accessVector.getArgs.getNode(0), frame)
+        val rhs=eval(e.getRHS, frame)
+        val VD=manifest[DenseVector[Double]]
+        val D=manifest[Double]
+        (vect.tpe) match{
+          case VD=>
+          (arg.tpe) match{
+            case D=> var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+                     vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt)=rhs.asInstanceOf[Rep[Double]]
+                     vect.asInstanceOf[Rep[DenseVector[Double]]]                     
+          }
+      }  
+      
 
     //not node-just for single boolean, for now
     case e:Not=>
