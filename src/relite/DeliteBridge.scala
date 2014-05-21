@@ -245,7 +245,7 @@ trait Eval extends OptiMLApplication with StaticData {
           case VD=>
             (arg.tpe) match{
               case D=> 
-                var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+                val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
                 vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
             }
           }
@@ -262,7 +262,7 @@ trait Eval extends OptiMLApplication with StaticData {
         (vect.tpe) match{
           case VD=>
           (arg.tpe) match{
-            case D=> var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+            case D=> val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
               vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt)=rhs.asInstanceOf[Rep[Double]]
               vect.asInstanceOf[Rep[DenseVector[Double]]]                     
             }
