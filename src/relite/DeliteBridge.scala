@@ -245,10 +245,10 @@ trait Eval extends OptiMLApplication with StaticData {
           case VD=>
             (arg.tpe) match{
               case D=> 
-                     var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
-                     vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
+                var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+                vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
+            }
           }
-      }
       
       
       //update double value vector node
@@ -263,10 +263,10 @@ trait Eval extends OptiMLApplication with StaticData {
           case VD=>
           (arg.tpe) match{
             case D=> var ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
-                     vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt)=rhs.asInstanceOf[Rep[Double]]
-                     vect.asInstanceOf[Rep[DenseVector[Double]]]                     
-          }
-      }  
+              vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt)=rhs.asInstanceOf[Rep[Double]]
+              vect.asInstanceOf[Rep[DenseVector[Double]]]                     
+            }
+          }  
       
 
     //not node-just for single boolean, for now
