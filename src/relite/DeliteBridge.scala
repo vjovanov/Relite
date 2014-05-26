@@ -252,10 +252,6 @@ trait Eval extends OptiMLApplication with StaticData {
        }
 
 
-    //not finished yet
-    case e: Function=>
-      val f = evalFun[Double,Double](e, frame)
-
      //if node - with or witouth else
      case e: If=>
        val cond=eval(e.getCond, frame)
