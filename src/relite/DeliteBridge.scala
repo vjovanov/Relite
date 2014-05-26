@@ -173,18 +173,42 @@ trait Eval extends OptiMLApplication with StaticData {
           }
           v1
       
+      	//defined functions - still not works
         case _ =>
-          val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
-          (e.getName.toString,args) match {
-            case ("Vector.rand",(n:Rep[Double])::Nil) => 
-              assert(n.tpe == manifest[Double])
-              Vector.rand(n.toInt)
-          case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
-              assert(v.tpe == manifest[DenseVector[Double]])
-              v.pprint
-	    
-            case s => println("unknown f: " + s + " / " + args.mkString(",")); 
+          //check if the name of the called function is present. e.g. the function is defined
+          val keys=envFunctions.keySet
+          val callName=e.getName.toString
+          if(keys.contains(e.getName)){
+            val functionNode=envFunctions.get(e.getName)
+              if(!functionNode.isEmpty){
+                val function=functionNode.get
+                //declared arguments of the function
+                val signature=function.getSignature //type: ArgumentList
+                //actual arguments of the call
+                val arguments=e.getArgs //ArgumentList, Rep
+                val realNrArgs=arguments.size
+                val expectedNrArgs:Rep[Int]=unit(signature.size).asInstanceOf[Rep[Int]]
+                 System.out.println(expectedNrArgs)  //prints ok in staging time, but println(expectedNrArgs) does not work in run-time
+                 if(realNrArgs==expectedNrArgs){  //this line is also problematic - type myssmatch Any-Rep[Any]
+                   val realParamValues=signature.map(a=>eval(a.getValue, frame1)).toList //this should evaluate the arguments in a new frame
+                   								 	//problem: create a new frame for the function
+                   eval(functionNode.getBody, frame1) //this should evaluate the body of the function with the passed parameters
+                 }
+             }
+
           }
+          else{
+            val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
+            (e.getName.toString,args) match {
+              case ("Vector.rand",(n:Rep[Double])::Nil) => 
+                assert(n.tpe == manifest[Double])
+                Vector.rand(n.toInt)
+              case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
+                assert(v.tpe == manifest[DenseVector[Double]])
+                v.pprint
+              case s => println("unknown f: " + s + " / " + args.mkString(",")); 
+            }
+         }
       }
 
      //vectors outer product, just for vectors of double for now
