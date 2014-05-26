@@ -44,6 +44,10 @@ import ppl.delite.framework.datastructures.DeliteArray
 trait Eval extends OptiMLApplication with StaticData {
   type Env = Map[RSymbol,Rep[Any]]
   var env: Env = Map.empty
+  
+   //storing declared functions
+  type EnvFunct=Map[RSymbol, Function]
+  var envFunctions:EnvFunct=Map.empty
 
   def infix_tpe[T](x:Rep[T]): Manifest[_]
 
@@ -98,10 +102,16 @@ trait Eval extends OptiMLApplication with StaticData {
 
   def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
     case e: Constant => liftValue(e.getValue )
-    case e: SimpleAssignVariable =>
+     case e: SimpleAssignVariable =>
       val lhs = e.getSymbol
-      val rhs = eval(e.getExpr,frame)
-      env = env.updated(lhs,rhs)
+      val rhs=e.getExpr
+      rhs match{
+        case rhs:Function=> 
+          envFunctions=envFunctions.updated(lhs, rhs) 
+        case _=>    
+          val rhss = eval(rhs,frame)
+          env = env.updated(lhs,rhss)  
+      }
     case e: SimpleAccessVariable =>
       val lhs = e.getSymbol
       env.getOrElse(lhs, {
@@ -210,6 +220,9 @@ trait Eval extends OptiMLApplication with StaticData {
             }
          }
       }
+
+     //function node
+     case e: Function=>e.asInstanceOf[Rep[Any]]
 
      //vectors outer product, just for vectors of double for now
      case e:OuterMult=>val firstVect=eval(e.getLHS, frame)
