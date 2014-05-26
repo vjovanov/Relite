@@ -220,9 +220,7 @@ trait Eval extends OptiMLApplication with StaticData {
             }
          }
       }
-
-     //function node
-     case e: Function=>e.asInstanceOf[Rep[Any]]
+      
 
      //vectors outer product, just for vectors of double for now
      case e:OuterMult=>val firstVect=eval(e.getLHS, frame)
