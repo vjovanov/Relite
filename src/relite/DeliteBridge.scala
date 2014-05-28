@@ -183,7 +183,8 @@ trait Eval extends OptiMLApplication with StaticData {
           }
           v1
       
-      	//defined functions - still not works
+      	//calls of defined functions
+      	//not working for arguments with default values yet
         case _ =>
           val keys=envFunctions.keySet
           val callName=e.getName.toString
@@ -202,6 +203,9 @@ trait Eval extends OptiMLApplication with StaticData {
               val result=eval(functionNode.getBody, frame)
               env=envBeforeFunction
               result
+            }
+            else{
+              println("Error in function call")
             }
           }
           else{
