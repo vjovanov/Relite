@@ -184,37 +184,25 @@ trait Eval extends OptiMLApplication with StaticData {
           v1
       
       	//defined functions - still not works
-        
-         case _ =>
- 
-           val keys=envFunctions.keySet
-           val callName=e.getName.toString
-           if(keys.contains(e.getName)){
-
-             val functionNode=envFunctions(e.getName)
-        
-                 val signature=functionNode.getSignature //ArgumentList
-           
-                 val arguments=e.getArgs //ArgumentList, Rep
-    
-
-                 var envBeforeFunction: EnvCurrFunctLoop = env.clone
-        	 val realNrArgs=arguments.size
-                 val expectedNrArgs=signature.size
-                 if(realNrArgs==expectedNrArgs){
-
-                   val argNames = signature.map(g => g.getName).toList
-            
-
-                   for(i<-(0 until realNrArgs)){
-                     env=env.updated(argNames(0), eval(arguments.getNode(i), frame))
-                   }
-                   val result=eval(functionNode.getBody, frame)
-                   env=envBeforeFunction
-                 result
-        
-             }
-
+        case _ =>
+          val keys=envFunctions.keySet
+          val callName=e.getName.toString
+          if(keys.contains(e.getName)){
+            val functionNode=envFunctions(e.getName)
+            val signature=functionNode.getSignature
+            val arguments=e.getArgs
+            var envBeforeFunction: EnvCurrFunctLoop = env.clone
+       	    val realNrArgs=arguments.size
+            val expectedNrArgs=signature.size
+            if(realNrArgs==expectedNrArgs){
+              val argNames = signature.map(g => g.getName).toList
+              for(i<-(0 until realNrArgs)){
+                env=env.updated(argNames(0), eval(arguments.getNode(i), frame))
+              }
+              val result=eval(functionNode.getBody, frame)
+              env=envBeforeFunction
+              result
+            }
           }
           else{
             val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
