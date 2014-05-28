@@ -184,26 +184,37 @@ trait Eval extends OptiMLApplication with StaticData {
           v1
       
       	//defined functions - still not works
-        case _ =>
-          //check if the name of the called function is present. e.g. the function is defined
-          val keys=envFunctions.keySet
-          val callName=e.getName.toString
-          if(keys.contains(e.getName)){
-            val functionNode=envFunctions.get(e.getName)
-              if(!functionNode.isEmpty){
-                val function=functionNode.get
-                //declared arguments of the function
-                val signature=function.getSignature //type: ArgumentList
-                //actual arguments of the call
-                val arguments=e.getArgs //ArgumentList, Rep
-                val realNrArgs=arguments.size
-                val expectedNrArgs:Rep[Int]=unit(signature.size).asInstanceOf[Rep[Int]]
-                 System.out.println(expectedNrArgs)  //prints ok in staging time, but println(expectedNrArgs) does not work in run-time
-                 if(realNrArgs==expectedNrArgs){  //this line is also problematic - type myssmatch Any-Rep[Any]
-                   val realParamValues=signature.map(a=>eval(a.getValue, frame1)).toList //this should evaluate the arguments in a new frame
-                   								 	//problem: create a new frame for the function
-                   eval(functionNode.getBody, frame1) //this should evaluate the body of the function with the passed parameters
-                 }
+        
+         case _ =>
+ 
+           val keys=envFunctions.keySet
+           val callName=e.getName.toString
+           if(keys.contains(e.getName)){
+
+             val functionNode=envFunctions(e.getName)
+        
+                 val signature=functionNode.getSignature //ArgumentList
+           
+                 val arguments=e.getArgs //ArgumentList, Rep
+    
+
+                 var envBeforeFunction: EnvCurrFunctLoop = env.clone
+        	 val realNrArgs=arguments.size
+                 val expectedNrArgs=signature.size
+                 if(realNrArgs==expectedNrArgs){
+
+                   val argNames = signature.map(g => g.getName).toList
+            
+
+                   for(i<-(0 until realNrArgs)){
+                     env=env.updated(argNames(0), eval(arguments.getNode(i), frame))
+                   }
+                   val result=eval(functionNode.getBody, frame)
+                   env=envBeforeFunction
+                   if(result.isInstanceOf[Rep[Any]]){println("It is Rep od Any")}else{println("Nekog je drugog tipa")}
+                 
+                   result
+        
              }
 
           }
