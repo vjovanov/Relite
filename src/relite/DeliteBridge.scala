@@ -211,9 +211,7 @@ trait Eval extends OptiMLApplication with StaticData {
                    }
                    val result=eval(functionNode.getBody, frame)
                    env=envBeforeFunction
-                   if(result.isInstanceOf[Rep[Any]]){println("It is Rep od Any")}else{println("Nekog je drugog tipa")}
-                 
-                   result
+                 result
         
              }
 
