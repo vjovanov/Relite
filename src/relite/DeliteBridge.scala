@@ -183,6 +183,16 @@ trait Eval extends OptiMLApplication with StaticData {
           }
           v1
       
+        //function exists
+      	case "exists"=>
+          val name:String=e.getArgs.getNode(0).toString //name of the value, we are searching for, string
+          val keys=env.keySet
+          var isPresent:Rep[Boolean]=unit(false)
+          for(k<-keys){
+            if(k.name.toString.equals(name)) isPresent=unit(true)
+          }
+          isPresent
+      
       	//calls of defined functions
       	//not working for arguments with default values yet
         case _ =>
