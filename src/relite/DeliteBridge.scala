@@ -300,7 +300,20 @@ trait Eval extends OptiMLApplication with StaticData {
             }
           }  
       
-
+     //for loop
+     case e:For=>
+       val body=e.getBody   //type: ASTNode
+       var envBeforeLoop: EnvCurrFunctLoop = env.clone
+       val counter=e.getCVar//type:RSymbol
+       val range:Rep[DenseVector[Double]]=eval(e.getRange, frame).asInstanceOf[Rep[DenseVector[Double]]] //type:ASTNode
+       val bodyEvaluated:Rep[Any]=unit(())
+       for(currVal <- range) {
+         env=env.updated(counter, currVal)
+         bodyEvaluated=eval(body, frame)
+       }
+       env=envBeforeLoop
+       bodyEvaluated
+       
     //not node-just for single boolean, for now
     case e:Not=>
       val lhs=eval(e.getLHS, frame)
