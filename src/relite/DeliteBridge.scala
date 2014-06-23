@@ -125,10 +125,12 @@ trait Eval extends OptiMLApplication with StaticData {
       val rhs = eval(e.getRHS,frame)
       val D = manifest[Double]
       val VD = manifest[DenseVector[Double]]
+      val VM = manifest[DenseMatrix[Double]]
       (lhs.tpe,rhs.tpe) match {
         case (D,D) => lhs.asInstanceOf[Rep[Double]] + rhs.asInstanceOf[Rep[Double]]
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
+        case (VM, VM) => lhs.asInstanceOf[Rep[DenseMatrix[Double]]] + rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
       }
     case e: Mult =>
       val lhs = eval(e.getLHS,frame)
