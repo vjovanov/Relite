@@ -227,6 +227,17 @@ trait Eval extends OptiMLApplication with StaticData {
         }
         resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
         
+        //function diag
+         case "diag" =>
+         val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+         val diagonal=DenseVector[Double](matrix.numRows, true)
+         var i=0
+         while(i<matrix.numRows){
+           diagonal(i)=matrix(i,i)
+           i+=1
+         }
+         diagonal
+        
         //function exists
       	case "exists"=>
           val name:String=e.getArgs.getNode(0).toString //name of the value, we are searching for, string
