@@ -190,6 +190,11 @@ trait Eval extends OptiMLApplication with StaticData {
           }
           v1
       
+        //function as.vector
+        case "as.vector" => println("AS VECTOR")
+          val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          matrix.vview(0,1,matrix.size,true).asInstanceOf[Rep[DenseVector[Double]]]
+        
         //function exists
       	case "exists"=>
           val name:String=e.getArgs.getNode(0).toString //name of the value, we are searching for, string
