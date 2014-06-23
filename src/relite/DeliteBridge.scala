@@ -284,6 +284,11 @@ trait Eval extends OptiMLApplication with StaticData {
             if(k.name.toString.equals(name)) isPresent=unit(true)
           }
           isPresent
+        
+        //function length  
+        case "length"=>
+          val arg=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          arg.length.asInstanceOf[Rep[Int]]
       
       	//calls of defined functions
       	//not working for arguments with default values yet
