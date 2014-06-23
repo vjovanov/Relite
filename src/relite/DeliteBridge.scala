@@ -209,6 +209,24 @@ trait Eval extends OptiMLApplication with StaticData {
               res=matrix.map(a => sqrt(a))
         }
         
+        //function upper.tri
+        case "upper.tri" =>
+        val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+        val resMatr=DenseMatrix[Boolean](matrix.numRows, matrix.numCols)
+        var i=0
+        while(i < matrix.numRows){
+          var j=0
+          while(j < matrix.numCols){
+            if(i<j)
+              resMatr(i,j)=true
+            else
+              resMatr(i,j)=false
+            j+=1
+          }
+          i+=1
+        }
+        resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
+        
         //function exists
       	case "exists"=>
           val name:String=e.getArgs.getNode(0).toString //name of the value, we are searching for, string
