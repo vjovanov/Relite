@@ -364,16 +364,36 @@ trait Eval extends OptiMLApplication with StaticData {
      case e: If=>
        val cond=eval(e.getCond, frame)
        val B=manifest[Boolean]
+       val I=manifest[Int]
        cond.tpe match{
-         case B=> if(cond.asInstanceOf[Rep[Boolean]]){ eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; }
-                  else{  
-                    val falseCase:ASTNode=e.getFalseCase
-                    val fc=scala.Option(falseCase)
-                    if(!fc.isEmpty){ eval(falseCase, frame).asInstanceOf[Rep[Any]];}
-                    else(unit(()))
-                 }
-      }
-      
+         case B=> 
+           if(cond.asInstanceOf[Rep[Boolean]]){ 
+             eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; 
+           }
+           else{  
+             val falseCase:ASTNode=e.getFalseCase
+             val fc=scala.Option(falseCase)
+             if(!fc.isEmpty){ 
+               eval(falseCase, frame).asInstanceOf[Rep[Any]];
+             }
+             else{
+               unit(())
+             }
+           }
+         case I=>
+           if(cond.asInstanceOf[Rep[Int]]!=0){ 
+             eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; 
+           }
+           else{  
+             val falseCase:ASTNode=e.getFalseCase
+             val fc=scala.Option(falseCase)
+             if(!fc.isEmpty){ eval(falseCase, frame).asInstanceOf[Rep[Any]];
+             }
+             else{
+             	unit(())
+             }
+           }
+
       //access double value vector node
       case e: AccessVector=>
         val vect=eval(e.getVector, frame)
