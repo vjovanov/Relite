@@ -238,6 +238,43 @@ trait Eval extends OptiMLApplication with StaticData {
          }
          diagonal
         
+        //function uoter
+        case "outer" =>
+          val args=e.getArgs
+          val v1=eval(args.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          val v2=eval(args.getNode(1), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          val op=eval(args.getNode(2), frame)
+          val VD = manifest[DenseVector[Double]]
+          (v1.tpe, v2.tpe) match {
+            case (VD,VD) =>
+            if(op=="-"){
+              val res=DenseMatrix[Double](v1.length, v2.length)
+              var i=0
+              while(i<v1.length){
+              var j=0
+              while(j<v2.length){
+                res(i,j)=(v1(i) - v2(j)).asInstanceOf[Rep[Double]]
+                j+=1
+              }
+              i+=1
+            }
+            res
+          }
+          else{ //the default case
+            val res=DenseMatrix[Double](v1.length, v2.length)
+            var i=0
+            while(i<v1.length){
+              var j=0
+              while(j<v2.length){
+                res(i,j)=(v1(i) * v2(j)).asInstanceOf[Rep[Double]]
+                j+=1
+              }
+              i+=1
+            }
+            res
+          }
+       }
+        
         //function exists
       	case "exists"=>
           val name:String=e.getArgs.getNode(0).toString //name of the value, we are searching for, string
