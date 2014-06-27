@@ -174,6 +174,30 @@ trait Eval extends OptiMLApplication with StaticData {
           val num=lhs.asInstanceOf[Rep[Double]]
           matrix.map(a => num/a)
       }
+      
+    //subtraction
+     case e:Sub =>
+       val lhs=eval(e.getLHS, frame)
+       val rhs=eval(e.getRHS, frame)
+       val VD=manifest[DenseVector[Double]]
+       (lhs.tpe, rhs.tpe) match {
+         case (VD, VD) =>
+           val v1=lhs.asInstanceOf[Rep[DenseVector[Double]]]
+           val v2=rhs.asInstanceOf[Rep[DenseVector[Double]]]
+           val size=v1.length
+           val res=v1.mutable
+           if(v2.length>size){
+             size=v2.length
+             val res=v2.mutable
+           }
+           var i=0;
+           while(i<v1.length && i<v2.length){
+              res(i)=v1(i)-v2(i)
+              i+=1
+            }
+            res
+        }
+      
     case e: Colon =>
       val lhs = eval(e.getLHS,frame)
       val rhs = eval(e.getRHS,frame)
