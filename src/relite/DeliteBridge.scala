@@ -228,45 +228,50 @@ trait Eval extends OptiMLApplication with StaticData {
         
         //function upper.tri
         case "upper.tri" =>
-        val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
-        val resMatr=DenseMatrix[Boolean](matrix.numRows, matrix.numCols)
-        var i=0
-        while(i < matrix.numRows){
-          var j=0
-          while(j < matrix.numCols){
-            if(i<j)
-              resMatr(i,j)=true
-            else
-              resMatr(i,j)=false
-            j+=1
-          }
-          i+=1
-        }
-        resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
+          val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val resMatr=DenseMatrix[Boolean](matrix.numRows, matrix.numCols)
+          var i=0
+          while(i < matrix.numRows){
+            var j=0
+            while(j < matrix.numCols){
+              if(i<j)
+                resMatr(i,j)=true
+              else
+                resMatr(i,j)=false
+              j+=1
+           }
+           i+=1
+         }
+         resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
         
         //function diag
          case "diag" =>
-         val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
-         val diagonal=DenseVector[Double](matrix.numRows, true)
-         var i=0
-         while(i<matrix.numRows){
-           diagonal(i)=matrix(i,i)
-           i+=1
-         }
-         diagonal
+           val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+           val diagonal=DenseVector[Double](matrix.numRows, true)
+           var i=0
+           while(i<matrix.numRows){
+             diagonal(i)=matrix(i,i)
+             i+=1
+           }
+           diagonal
          
         //function diag for assigment
         //TODO: fix the staging time error
         case "diag<-" =>
-        var matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
-        val number=eval(e.getArgs.getNode(1), frame).asInstanceOf[Rep[Double]]
-        var i=0
-        while(i<matrix.numRows){
-          matrix(i,i)=number
-          i+=1
-        }
-        unit(())
-        
+          var matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val number=eval(e.getArgs.getNode(1), frame).asInstanceOf[Rep[Double]]
+          var i=0
+          while(i<matrix.numRows){
+            matrix(i,i)=number
+            i+=1
+          }
+          unit(())
+          
+        //return
+        //TODO: handle cases when return is in the middle of function body
+       case "return" =>
+         val value=eval(e.getArgs.getNode(0), frame)
+         
         //function uoter
         case "outer" =>
           val args=e.getArgs
