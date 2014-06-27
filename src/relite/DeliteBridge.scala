@@ -256,6 +256,7 @@ trait Eval extends OptiMLApplication with StaticData {
          diagonal
          
         //function diag for assigment
+        //TODO: fix the staging time error
         case "diag<-" =>
         var matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
         val number=eval(e.getArgs.getNode(1), frame).asInstanceOf[Rep[Double]]
