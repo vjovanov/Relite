@@ -157,6 +157,23 @@ trait Eval extends OptiMLApplication with StaticData {
         case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[Double]]
         case (VM, VM) =>
           (rhs.asInstanceOf[Rep[DenseMatrix[Double]]] *:* lhs.asInstanceOf[Rep[DenseMatrix[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]] 
+         case (VD,VM) =>
+           val vector=lhs.asInstanceOf[Rep[DenseVector[Double]]]
+           val matrix=rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+           val vectorSize=vector.length
+           val matrixRows=matrix.numRows
+           val matrixCols=matrix.numCols
+           val res=matrix.mutable
+           var i=0
+           while(i<matrixRows){
+             var j=0
+             while(j<matrixCols){
+               res(i,j)=res(i,j)*vector(i % vectorSize)
+               j+=1
+             }
+             i+=1
+            }
+            res
       }
       
     case e: Div =>
