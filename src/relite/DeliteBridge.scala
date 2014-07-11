@@ -201,18 +201,7 @@ trait Eval extends OptiMLApplication with StaticData {
          case (VD, VD) =>
            val v1=lhs.asInstanceOf[Rep[DenseVector[Double]]]
            val v2=rhs.asInstanceOf[Rep[DenseVector[Double]]]
-           val size=v1.length
-           val res=v1.mutable
-           if(v2.length>size){
-             size=v2.length
-             val res=v2.mutable
-           }
-           var i=0;
-           while(i<v1.length && i<v2.length){
-              res(i)=v1(i)-v2(i)
-              i+=1
-            }
-            res
+           (v1 - v2).asInstanceOf[Rep[DenseVector[Double]]]
         }
       
     case e: Colon =>
