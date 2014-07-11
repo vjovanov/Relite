@@ -232,9 +232,27 @@ trait Eval extends OptiMLApplication with StaticData {
           v1
       
         //function as.vector
-        case "as.vector" => println("AS VECTOR")
-          val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
-          matrix.vview(0,1,matrix.size,true).asInstanceOf[Rep[DenseVector[Double]]]
+        case "as.vector" =>
+          val myArg=eval(e.getArgs.getNode(0), frame)
+          if(myArg.isInstanceOf[Rep[DenseVector[Double]]])
+            myArg.asInstanceOf[Rep[DenseVector[Double]]]
+          else if(myArg.isInstanceOf[Rep[DenseMatrix[Double]]]){
+            val matrix=myArg.asInstanceOf[Rep[DenseMatrix[Double]]]
+            val vectSize=matrix.numRows*matrix.numCols
+            val res=DenseVector[Double](vectSize, true)
+            var ii=0
+            while(ii < matrix.numRows){
+              var jj=0
+              while(jj < matrix.numCols){
+                res(matrix.numCols*ii+jj)=matrix(ii,jj)
+                jj+=1
+              }
+              ii+=1
+            }
+            res
+          }
+          else
+            unit(())
         
         //function sqrt, for numbers and matrice
         case "sqrt" =>
