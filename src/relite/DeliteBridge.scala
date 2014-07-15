@@ -368,10 +368,16 @@ trait Eval extends OptiMLApplication with StaticData {
           isPresent
         
         //function length  
-        case "length"=>
-          val arg=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
-          arg.length.asInstanceOf[Rep[Int]]
-      
+         case "length"=>
+           val VD=manifest[DenseVector[Double]]
+           val D=manifest[Double]
+           val arg=eval(e.getArgs.getNode(0), frame)
+           (arg.tpe) match{
+             case VD=>((arg.asInstanceOf[Rep[DenseVector[Double]]]).length).asInstanceOf[Rep[Int]]
+             case D=>val value=arg.asInstanceOf[Rep[Double]]; ((value/value).toInt).asInstanceOf[Rep[Int]]
+             case _=> val value=arg.asInstanceOf[Rep[Double]]; ((value-value).toInt).asInstanceOf[Rep[Int]]
+           }
+        
       	//calls of defined functions
       	//not working for arguments with default values yet
         case _ =>
