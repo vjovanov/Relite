@@ -291,6 +291,13 @@ trait Eval extends OptiMLApplication with StaticData {
            i+=1
          }
          resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
+         
+        //function cat 
+        case "cat" =>
+          val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
+         for(arg<-args){
+           print(arg+" ")
+         }
         
         //function diag
          case "diag" =>
