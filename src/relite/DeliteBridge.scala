@@ -487,16 +487,27 @@ trait Eval extends OptiMLApplication with StaticData {
        val cond=eval(e.getCond, frame)
        val B=manifest[Boolean]
        val I=manifest[Int]
+       val D=manifest[Double]
        cond.tpe match{
          case B=> 
            if(cond.asInstanceOf[Rep[Boolean]]){ 
-             eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; 
+             val result=eval(e.getTrueCase, frame)
+             (result.tpe) match{
+                     case I=>result.asInstanceOf[Rep[Int]]
+                     case D=>result.asInstanceOf[Rep[Double]]
+                     case B=>result.asInstanceOf[Rep[Boolean]]  
+                   }
            }
            else{  
              val falseCase:ASTNode=e.getFalseCase
              val fc=scala.Option(falseCase)
              if(!fc.isEmpty){ 
-               eval(falseCase, frame).asInstanceOf[Rep[Any]];
+               val result=eval(falseCase, frame)
+               (result.tpe) match{
+                     case I=>result.asInstanceOf[Rep[Int]]
+                     case D=>result.asInstanceOf[Rep[Double]]
+                     case B=>result.asInstanceOf[Rep[Boolean]]  
+                   }
              }
              else{
                unit(())
@@ -504,12 +515,23 @@ trait Eval extends OptiMLApplication with StaticData {
            }
          case I=>
            if(cond.asInstanceOf[Rep[Int]]!=0){ 
-             eval(e.getTrueCase, frame).asInstanceOf[Rep[Any]]; 
+             val result=eval(e.getTrueCase, frame)
+             (result.tpe) match{
+                     case I=>result.asInstanceOf[Rep[Int]]
+                     case D=>result.asInstanceOf[Rep[Double]]
+                     case B=>result.asInstanceOf[Rep[Boolean]]  
+                   }
            }
            else{  
              val falseCase:ASTNode=e.getFalseCase
              val fc=scala.Option(falseCase)
-             if(!fc.isEmpty){ eval(falseCase, frame).asInstanceOf[Rep[Any]];
+             if(!fc.isEmpty){ 
+               val result=eval(falseCase, frame)
+               (result.tpe) match{
+                     case I=>result.asInstanceOf[Rep[Int]]
+                     case D=>result.asInstanceOf[Rep[Double]]
+                     case B=>result.asInstanceOf[Rep[Boolean]]  
+                   }
              }
              else{
              	unit(())
