@@ -320,6 +320,13 @@ trait Eval extends OptiMLApplication with StaticData {
        case "return" =>
          val value=eval(e.getArgs.getNode(0), frame)
          
+       case "as.integer" =>
+         val arg=eval(e.getArgs.getNode(0), frame) 
+         val D=manifest[Double]
+         (arg.tpe) match{
+           case D=> ((arg.asInstanceOf[Rep[Double]])toInt).asInstanceOf[Rep[Int]]
+         } 
+         
         //function uoter
         case "outer" =>
           val args=e.getArgs
