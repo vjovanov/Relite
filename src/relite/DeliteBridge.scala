@@ -392,6 +392,21 @@ trait Eval extends OptiMLApplication with StaticData {
              case _=> val value=arg.asInstanceOf[Rep[Double]]; ((value-value).toInt).asInstanceOf[Rep[Int]]
            }
         
+          //function options
+          //TODO: fix/complete it. This doesn't work for now
+          case "options"=>
+          val arg=e.getArgs.getNode(0)
+          val I=manifest[Int]
+          (arg) match{
+            case arg:Constant=>
+              val const=eval(arg, frame)
+          //    (const.tpe) match{
+          //      case I=>digits=const.toInt //here digits should be some global value
+          //      unit(())
+          //    }
+          }
+
+        
       	//calls of defined functions
       	//not working for arguments with default values yet
         case _ =>
