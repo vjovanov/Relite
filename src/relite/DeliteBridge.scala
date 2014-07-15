@@ -99,6 +99,11 @@ trait Eval extends OptiMLApplication with StaticData {
         }
       }
   }
+  
+  //casting function
+  def cast[A : Manifest](value: Rep[Any]): Rep[A] = {
+    value.asInstanceOf[Rep[A]]
+  }
 
   def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
     case e: Constant => liftValue(e.getValue )
