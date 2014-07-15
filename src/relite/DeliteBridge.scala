@@ -502,6 +502,7 @@ trait Eval extends OptiMLApplication with StaticData {
                 val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
                 vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
             }
+            case D=> vect.asInstanceOf[Rep[Double]]
             case VM =>
               (arg.tpe) match{
                 case BM=>
