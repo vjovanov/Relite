@@ -203,6 +203,10 @@ trait Eval extends OptiMLApplication with StaticData {
        val rhs=eval(e.getRHS, frame)
        val VD=manifest[DenseVector[Double]]
        (lhs.tpe, rhs.tpe) match {
+       	 case(D, D)=> 
+           val v1=cast[Double](lhs)
+           val v2=cast[Double](rhs)
+           cast[Double](v1-v2)
          case (VD, VD) =>
            val v1=lhs.asInstanceOf[Rep[DenseVector[Double]]]
            val v2=rhs.asInstanceOf[Rep[DenseVector[Double]]]
@@ -331,6 +335,14 @@ trait Eval extends OptiMLApplication with StaticData {
         //TODO: handle cases when return is in the middle of function body
        case "return" =>
          val value=eval(e.getArgs.getNode(0), frame)
+         val D=manifest[Double]
+         val I=manifest[Int]
+         (value.tpe) match{
+           case D=>cast[Double](value)
+           case I=>cast[Int](value)
+           case _=>value
+         }
+
          
        case "as.integer" =>
          val arg=eval(e.getArgs.getNode(0), frame) 
