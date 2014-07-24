@@ -590,12 +590,23 @@ trait Eval extends OptiMLApplication with StaticData {
         (vect.tpe) match{
           case VD=>
           (arg.tpe) match{
-            case D=> val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
-              vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt)=rhs.asInstanceOf[Rep[Double]]
-              vect.asInstanceOf[Rep[DenseVector[Double]]]                     
-            }
-          }  
-      
+            case D=>
+              val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
+              val v=cast[DenseVector[Double]](vect)
+              (rhs.tpe) match{
+                case D=>
+                  val invertEnv=env.map(_.swap)
+                  val theKey:RSymbol=invertEnv(v)
+                  val vectMut=cast[DenseVector[Double]](v.mutable)  
+                  val index=(ind.toInt-1).toInt
+                  vectMut(index)=cast[Double](rhs) //TODO: fix this -  it comes to an assertion error, caused by rhs??????
+                  env=env.updated(theKey, cast[DenseVector[Double]](vectMut))
+                  (cast[DenseVector[Double]](env(theKey))).pprint //TODO: fix this - it is updated as expected, but laterit retains the old value
+                  unit(())
+              }
+          }
+      }
+
      //for loop
      case e:For=>
        val body=e.getBody   //type: ASTNode
