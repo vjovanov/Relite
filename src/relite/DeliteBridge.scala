@@ -320,15 +320,20 @@ trait Eval extends OptiMLApplication with StaticData {
            diagonal
          
         //function diag for assigment
-        //TODO: fix the staging time error
         case "diag<-" =>
-          var matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val matrix=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
           val number=eval(e.getArgs.getNode(1), frame).asInstanceOf[Rep[Double]]
+
+          val invertEnv=env.map(_.swap)
+          val theKey:RSymbol=invertEnv(matrix)
+          val matrMut=cast[DenseMatrix[Double]](matrix.mutable)  
+          
           var i=0
-          while(i<matrix.numRows){
-            matrix(i,i)=number
+          while(i<matrMut.numRows){
+            matrMut(i,i)=number
             i+=1
           }
+          env=env.updated(theKey, cast[DenseMatrix[Double]](matrMut.Clone))
           unit(())
           
         //return
