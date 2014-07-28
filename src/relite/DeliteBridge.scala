@@ -586,30 +586,17 @@ trait Eval extends OptiMLApplication with StaticData {
       
       //update double value vector node
       case e:UpdateVector=>
+        val rhs=cast[Double](eval(e.getRHS, frame))
         val accessVector=e.getVector
-        val vect=eval(accessVector.getVector, frame)
-        val arg=eval(accessVector.getArgs.getNode(0), frame)
-        val rhs=eval(e.getRHS, frame)
-        val VD=manifest[DenseVector[Double]]
-        val D=manifest[Double]
-        (vect.tpe) match{
-          case VD=>
-          (arg.tpe) match{
-            case D=>
-              val ind:Rep[Int]=arg.asInstanceOf[Rep[Int]]
-              val v=cast[DenseVector[Double]](vect)
-              (rhs.tpe) match{
-                case D=>
-                  val invertEnv=env.map(_.swap)
-                  val theKey:RSymbol=invertEnv(v)
-                  val vectMut=cast[DenseVector[Double]](v.mutable)  
-                  val index=(ind.toInt-1).toInt
-                  vectMut(index)=cast[Double](rhs) //TODO: fix this -  it comes to an assertion error, caused by rhs??????
-                  env=env.updated(theKey, cast[DenseVector[Double]](vectMut))
-                  (cast[DenseVector[Double]](env(theKey))).pprint //TODO: fix this - it is updated as expected, but laterit retains the old value
-                  unit(())
-              }
-          }
+        val vect=cast[DenseVector[Double]](eval(accessVector.getVector, frame))
+        val arg=cast[Int](eval(accessVector.getArgs.getNode(0), frame))
+        val invertEnv=env.map(_.swap)
+        val theKey:RSymbol=invertEnv(vect)
+        val vectMut=vect 
+        val index=(arg.toInt-1).toInt
+        vectMut(index)=rhs
+        env=env.updated(theKey, cast[DenseVector[Double]](vectMut.Clone))
+        unit(())
       }
 
      //for loop
