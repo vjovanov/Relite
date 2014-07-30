@@ -444,7 +444,7 @@ trait Eval extends OptiMLApplication with StaticData {
               val result=eval(functionNode.getBody, frame)
               globalEnv.foreach(pair=> currentEnv.update(pair._1, pair._2))
               env=currentEnv
-              currentEnv=scala.collection.immutable.Map.empty
+              globalEnv=scala.collection.immutable.Map.empty
               result
 
             }
