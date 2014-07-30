@@ -50,6 +50,8 @@ trait Eval extends OptiMLApplication with StaticData {
    //storing declared functions
   type EnvFunct=Map[RSymbol, Function]
   var envFunctions:EnvFunct=Map.empty
+  
+  var globalEnv:scala.collection.immutable.Map[RSymbol,Rep[Any]]=scala.collection.immutable.Map.empty
 
   def infix_tpe[T](x:Rep[T]): Manifest[_]
 
@@ -429,7 +431,9 @@ trait Eval extends OptiMLApplication with StaticData {
             val functionNode=envFunctions(e.getName)
             val signature=functionNode.getSignature
             val arguments=e.getArgs
-            var envBeforeFunction: EnvCurrFunctLoop = env.clone
+            
+            var currentEnv = env.clone
+            
        	    val realNrArgs=arguments.size
             val expectedNrArgs=signature.size
             if(realNrArgs==expectedNrArgs){
@@ -438,8 +442,11 @@ trait Eval extends OptiMLApplication with StaticData {
                 env=env.updated(argNames(0), eval(arguments.getNode(i), frame))
               }
               val result=eval(functionNode.getBody, frame)
-              env=envBeforeFunction
+              globalEnv.foreach(pair=> currentEnv.update(pair._1, pair._2))
+              env=currentEnv
+              currentEnv=scala.collection.immutable.Map.empty
               result
+
             }
             else{
               println("Error in function call")
@@ -581,14 +588,28 @@ trait Eval extends OptiMLApplication with StaticData {
         val accessVector=e.getVector
         val vect=cast[DenseVector[Double]](eval(accessVector.getVector, frame))
         val arg=cast[Int](eval(accessVector.getArgs.getNode(0), frame))
+        val index=(arg.toInt-1).toInt
+
         val invertEnv=env.map(_.swap)
         val theKey:RSymbol=invertEnv(vect)
-        val vectMut=vect 
-        val index=(arg.toInt-1).toInt
+
+        val vectMut=DenseVector[Double](vect.length, true)
+        var i=0
+        while(i<index){
+          vectMut(i)=vect(i)
+          i+=1
+        }
         vectMut(index)=rhs
-        env=env.updated(theKey, cast[DenseVector[Double]](vectMut.Clone))
-        unit(())
-      }
+        i+=1
+        while(i<vect.length){
+          vectMut(i)=vect(i)
+          i+=1
+        }
+        if(e.isSuper())
+          globalEnv=globalEnv.updated(theKey, vectMut)
+        else
+          env=env.updated(theKey, vectMut.Clone)
+      
 
      //for loop
      case e:For=>
