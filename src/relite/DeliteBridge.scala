@@ -420,6 +420,21 @@ trait Eval extends OptiMLApplication with StaticData {
           //      unit(())
           //    }
           }
+          
+          
+          //function rep
+          case "rep"=>
+            val args=e.getArgs
+            val num=eval(args.getNode(0), frame)
+            val times=eval(args.getNode(1), frame)
+            val D=manifest[Double]
+            (num.tpe, times.tpe) match{
+              case(D,D)=>
+                val number=cast[Double](num)
+                val t=cast [Int]((cast[Double](times)).toInt)
+                val resultingVector = DenseVector.zeros(t).map(e => number)
+                resultingVector
+            }
 
         
       	//calls of defined functions
