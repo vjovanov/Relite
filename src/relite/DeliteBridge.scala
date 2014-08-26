@@ -435,6 +435,16 @@ trait Eval extends OptiMLApplication with StaticData {
                 val resultingVector = DenseVector.zeros(t).map(e => number)
                 resultingVector
             }
+            
+          //functio seq
+          case "seq"=>
+            val arg=eval(e.getArgs.getNode(0), frame)
+            val D=manifest[Double]
+            (arg.tpe) match{
+              case D=>
+                val arg1=cast[Double](arg)
+                DenseVector.uniform(1, 1, arg1+1)
+            }
 
         
       	//calls of defined functions
