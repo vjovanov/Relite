@@ -470,7 +470,23 @@ trait Eval extends OptiMLApplication with StaticData {
               globalEnv.foreach(pair=> currentEnv.update(pair._1, pair._2))
               env=currentEnv
               globalEnv=scala.collection.immutable.Map.empty
-              result
+              
+              val VD=manifest[DenseVector[Double]]
+              val D=manifest[Double]
+             
+
+              (result.tpe) match{
+                 case VD=>
+                   println("Function return type - Rep[DenseVector[Double]]")// TODO: remove this; debugging purpose 
+                   cast[DenseVector[Double]](result)
+                 case D=>
+                   println("Function return type - Rep[Double]") //TODO: remove this
+                   cast[Double](result)
+                 case _=> //TODO: expand for other cases, for now, double is enough
+                   println("Function return type - Something else") //TODO: remove this
+                   result
+              }
+
 
             }
             else{
