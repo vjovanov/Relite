@@ -21,11 +21,11 @@
  */
 package generated.scala
 
-class BooleanDenseVectorView(val _data: Array[Boolean], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) { 
+class BooleanDenseVectorView(val _data: Array[Boolean], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) {
 
-  private def idx(n: Int) = _start + n*_stride
+  private def idx(n: Int) = _start + n * _stride
 
-  def apply(n: Int) : Boolean = {
+  def apply(n: Int): Boolean = {
     _data(idx(n))
   }
 

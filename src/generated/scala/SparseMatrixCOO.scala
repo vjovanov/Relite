@@ -24,8 +24,8 @@ package generated.scala
 /*
  * A sparse matrix in COOrdinate format. Efficient for constructing sparse matrices
  * and converting to other (CSR, CSC) formats.
- */ 
-class SparseMatrixCOO[@specialized T: Manifest](__numRows: Int, __numCols: Int) { 
+ */
+class SparseMatrixCOO[@specialized T: Manifest](__numRows: Int, __numCols: Int) {
   var _numRows = __numRows
   var _numCols = __numCols
   // non-zero values, left-to-right then top-to-bottom
@@ -38,16 +38,16 @@ class SparseMatrixCOO[@specialized T: Manifest](__numRows: Int, __numCols: Int) 
   var _nnz = 0
 
   /**
-   * These are temporarily needed because they are hard-coded into DeliteOp code gen. 
-   */    
-  def unsafeSetData(xs: Array[T], len: Int) = throw new UnsupportedOperationException("unsafeSetData in SparseMatrixCOO not supported")  
-  
-  def Clone = { 
+   * These are temporarily needed because they are hard-coded into DeliteOp code gen.
+   */
+  def unsafeSetData(xs: Array[T], len: Int) = throw new UnsupportedOperationException("unsafeSetData in SparseMatrixCOO not supported")
+
+  def Clone = {
     val m = new SparseMatrixCOO[T](_numRows, _numCols)
     m._data = _data.clone
     m._colIndices = _colIndices.clone
     m._rowIndices = _rowIndices.clone
     m._nnz = _nnz
     m
-  }  
+  }
 }

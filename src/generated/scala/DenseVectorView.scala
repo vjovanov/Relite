@@ -21,11 +21,11 @@
  */
 package generated.scala
 
-class DenseVectorView[T:Manifest](val _data: Array[T], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) { 
+class DenseVectorView[T: Manifest](val _data: Array[T], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) {
 
-  private def idx(n: Int) = _start + n*_stride
+  private def idx(n: Int) = _start + n * _stride
 
-  def apply(n: Int) : T = {
+  def apply(n: Int): T = {
     _data(idx(n))
   }
 

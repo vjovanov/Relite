@@ -21,24 +21,24 @@
  */
 package relite
 
-import ppl.dsl.optiml.{OptiMLApplication, OptiMLApplicationRunner}
+import ppl.dsl.optiml.{ OptiMLApplication, OptiMLApplicationRunner }
 
 import ppl.delite.framework.DeliteApplication
 import ppl.delite.framework.Config
 
-import ppl.dsl.optiml.{OptiMLCodeGenScala,OptiMLCodeGenCuda,OptiMLExp}
-import ppl.delite.framework.codegen.delite.{DeliteCodeGenPkg, TargetDelite}
-import ppl.delite.framework.codegen.{Target}
-import ppl.delite.framework.codegen.scala.{TargetScala}
-import ppl.delite.framework.codegen.cuda.{TargetCuda}
-import scala.virtualization.lms.internal.{GenericFatCodegen}
+import ppl.dsl.optiml.{ OptiMLCodeGenScala, OptiMLCodeGenCuda, OptiMLExp }
+import ppl.delite.framework.codegen.delite.{ DeliteCodeGenPkg, TargetDelite }
+import ppl.delite.framework.codegen.{ Target }
+import ppl.delite.framework.codegen.scala.{ TargetScala }
+import ppl.delite.framework.codegen.cuda.{ TargetCuda }
+import scala.virtualization.lms.internal.{ GenericFatCodegen }
 
 import scala.virtualization.lms.common._
 import scala.collection.mutable
 import scala.collection.mutable.{ ArrayBuffer, SynchronizedBuffer }
 
 import java.io.{ Console => _, _ }
-import java.io.{File,FileSystem}
+import java.io.{ File, FileSystem }
 
 class MainDeliteRunner extends DeliteTestRunner with OptiMLApplicationRunner /*with VariablesExpOpt*/ { self =>
 
@@ -50,7 +50,7 @@ class MainDeliteRunner extends DeliteTestRunner with OptiMLApplicationRunner /*w
     program(0)
   }
 
-/*
+  /*
   // mix in delite and lancet generators
   val scalaGen = new ScalaCodegen { val IR: self.type = self }//; Console.println("SCG"); allClass(this.getClass) }
   override def createCodegen() = new ScalaCodegen { val IR: self.type = self }
@@ -72,9 +72,6 @@ class MainDeliteRunner extends DeliteTestRunner with OptiMLApplicationRunner /*w
 */
 }
 
-
-
-
 // *** from delite test runner. call compileAndTest to run an app
 
 object DeliteRunner {
@@ -90,7 +87,7 @@ object DeliteRunner {
   var verbose = props.getProperty("tests.verbose", "false").toBoolean
   var verboseDefs = props.getProperty("tests.verboseDefs", "false").toBoolean
   var threads = props.getProperty("tests.threads", "1")
-  var cacheSyms = false /* NNOOOOOOOOOO!!!!!!!!!!!*/   //props.getProperty("tests.cacheSyms", "true").toBoolean
+  var cacheSyms = false /* NNOOOOOOOOOO!!!!!!!!!!!*/ //props.getProperty("tests.cacheSyms", "true").toBoolean
   var javaHome = new File(props.getProperty("java.home", ""))
   var scalaHome = new File(props.getProperty("scala.vanilla.home", ""))
   var runtimeClasses = new File(props.getProperty("runtime.classes", ""))
@@ -107,7 +104,6 @@ object DeliteRunner {
     else if (runtimeExternalProc && (!scalaCompiler.exists || !scalaLibrary.exists)) throw new TestFailedException("Could not find valid scala installation in " + scalaHome, 3)
     else if (runtimeExternalProc && !runtimeClasses.exists) throw new TestFailedException("runtime.classes must be a valid path in delite.properties", 3)
   }
-
 
   def compileAndTest(app: DeliteTestRunner) {
     compileAndTest2(app, app.getClass.getName.replaceAll("\\$", ""))
@@ -134,7 +130,7 @@ object DeliteRunner {
     val generatedDir = (new File("generated")).getAbsolutePath + /*protobuf wants absolute path*/
       java.io.File.separator + uniqueTestName
     try {
-      Config.degFilename = degName 
+      Config.degFilename = degName
       Config.buildDir = generatedDir
       Config.cacheSyms = cacheSyms
       //Config.generateCUDA = true
@@ -149,7 +145,7 @@ object DeliteRunner {
         }
         //assert(!app.hadErrors) //TR should enable this check at some time ...
       }
-    } finally { 
+    } finally {
       // concurrent access check 
       assert(Config.buildDir == generatedDir)
       Config.degFilename = save
@@ -168,13 +164,13 @@ object DeliteRunner {
     //System.setProperty("delite.cuda", 1.toString)
     System.setProperty("delite.code.cache.home", System.getProperty("user.dir") + java.io.File.separator + "generatedCache" + java.io.File.separator + uniqueTestName)
     //Console.withOut(new PrintStream(new FileOutputStream(name))) {
-      println("test output for: " + app.toString)
-      // NOTE: DeliteCodegen (which computes app.staticDataMap) does not know about VConstantPool!!!
-      val staticDataMap = app match {
-        //case app: Base_LMS => app.VConstantPool.map(kv=>kv._1.toString->kv._2).toMap
-        case app => app.staticDataMap
-      }
-      ppl.delite.runtime.Delite.embeddedMain(args, staticDataMap) // was: app.staticDataMap
+    println("test output for: " + app.toString)
+    // NOTE: DeliteCodegen (which computes app.staticDataMap) does not know about VConstantPool!!!
+    val staticDataMap = app match {
+      //case app: Base_LMS => app.VConstantPool.map(kv=>kv._1.toString->kv._2).toMap
+      case app => app.staticDataMap
+    }
+    ppl.delite.runtime.Delite.embeddedMain(args, staticDataMap) // was: app.staticDataMap
     //}
     /*val buf = new Array[Byte](new File(name).length().toInt)
     val fis = new FileInputStream(name)
@@ -182,9 +178,8 @@ object DeliteRunner {
     fis.close()
     val r = new String(buf)
     if (verbose) System.out.println(r)
-    r*/""
+    r*/ ""
   }
-
 
   def checkTest(app: DeliteTestRunner, outStr: String) {
     println("CHECKING...")
@@ -200,11 +195,10 @@ object DeliteRunner {
   }
 }
 
-
 class TestFailedException(s: String, i: Int) extends Exception(s)
 
 trait DeliteTestRunner extends DeliteTestModule with DeliteApplication
-  with MiscOpsExp with SynchronizedArrayBufferOpsExp with StringOpsExp {
+    with MiscOpsExp with SynchronizedArrayBufferOpsExp with StringOpsExp {
 
   var resultBuffer: ArrayBuffer[Boolean] = _
 
@@ -212,7 +206,7 @@ trait DeliteTestRunner extends DeliteTestModule with DeliteApplication
 }
 
 trait DeliteTestModule extends Object
-  with MiscOps with SynchronizedArrayBufferOps with StringOps {
+    with MiscOps with SynchronizedArrayBufferOps with StringOps {
 
   def main(): Unit
 

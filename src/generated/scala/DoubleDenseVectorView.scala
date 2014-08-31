@@ -21,11 +21,11 @@
  */
 package generated.scala
 
-class DoubleDenseVectorView(val _data: Array[Double], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) { 
+class DoubleDenseVectorView(val _data: Array[Double], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) {
 
-  private def idx(n: Int) = _start + n*_stride
+  private def idx(n: Int) = _start + n * _stride
 
-  def apply(n: Int) : Double = {
+  def apply(n: Int): Double = {
     _data(idx(n))
   }
 

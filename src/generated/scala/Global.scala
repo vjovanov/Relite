@@ -40,5 +40,4 @@ object Global {
   var randRef = new scala.util.Random(INITIAL_SEED)
   var intRandRef = new scala.util.Random(INITIAL_SEED)
 
-
 }

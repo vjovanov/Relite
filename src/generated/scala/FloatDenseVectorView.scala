@@ -21,11 +21,11 @@
  */
 package generated.scala
 
-class FloatDenseVectorView(val _data: Array[Float], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) { 
+class FloatDenseVectorView(val _data: Array[Float], val _start: Int, val _stride: Int, val _length: Int, val _isRow: Boolean) {
 
-  private def idx(n: Int) = _start + n*_stride
+  private def idx(n: Int) = _start + n * _stride
 
-  def apply(n: Int) : Float = {
+  def apply(n: Int): Float = {
     _data(idx(n))
   }
 

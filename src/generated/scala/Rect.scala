@@ -22,9 +22,8 @@
 package generated.scala.application
 import generated.scala._
 
-class Rect (
+class Rect(
   val x: Int,
   val y: Int,
   val width: Int,
-  val height: Int
-)
+  val height: Int)

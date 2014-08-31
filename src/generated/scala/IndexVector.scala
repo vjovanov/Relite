@@ -21,8 +21,6 @@
  */
 package generated.scala
 
-
-
 /* IndexVector is an IntVector whose elements represent indices (e.g., of another vector).
  * It is either backed by a discrete sequence of integers (e.g. 1,5,10) or a continouous RangeVector.
  *
@@ -39,37 +37,37 @@ package generated.scala
  *
  */
 
-class IndexVectorDenseC(__length: Int, __isRow: Boolean) { 
+class IndexVectorDenseC(__length: Int, __isRow: Boolean) {
   var _length = __length
   var _isRow = __isRow
   var _data: Array[Int] = new Array[Int](_length)
-  
+
   /**
-   * These are temporarily needed because they are hard-coded into DeliteOp code gen. 
-   */    
+   * These are temporarily needed because they are hard-coded into DeliteOp code gen.
+   */
   def unsafeSetData(xs: Array[Int], len: Int) {
     _data = xs
     _length = len
   }
-  
-  def Clone = { 
+
+  def Clone = {
     val v = new IntDenseVector(_length, _isRow);
     v._data = _data.clone
     v
-  }    
+  }
 }
 
-class IndexVectorRange(__start: Int, __end: Int) { 
+class IndexVectorRange(__start: Int, __end: Int) {
   var _start = __start
   var _end = __end
   var _stride = 1
   var _isRow = true
-  
+
   def unsafeSetData(xs: Array[Int], len: Int) {
     throw new IllegalArgumentException("RangeVector cannot be updated")
   }
-    
-  def Clone = { 
+
+  def Clone = {
     val len = _end - _start
     val v = new IntDenseVector(len, _isRow)
     var i = 0
@@ -78,5 +76,5 @@ class IndexVectorRange(__start: Int, __end: Int) {
       i += 1
     }
     v
-  }  
+  }
 }

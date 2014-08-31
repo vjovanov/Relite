@@ -21,8 +21,6 @@
  */
 package generated.scala
 
-
-
 /* StreamRowImpl wraps a DenseVectorView that represents a Stream row.
  *
  * author:  Arvind Sujeeth (asujeeth@stanford.edu)
@@ -34,8 +32,8 @@ package generated.scala
  */
 
 class DoubleStreamRow(chunkRow: Int, offset: Int, stream: DoubleStream, x: Array[Double])
-  extends DoubleDenseVectorView(x, chunkRow*stream.numCols, 1, stream.numCols, true) {
+    extends DoubleDenseVectorView(x, chunkRow * stream.numCols, 1, stream.numCols, true) {
 
   // absolute row index in the stream
-  val index = offset*stream.chunkSize + chunkRow
+  val index = offset * stream.chunkSize + chunkRow
 }

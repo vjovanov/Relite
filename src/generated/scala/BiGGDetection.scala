@@ -22,7 +22,7 @@
 package generated.scala.application
 import generated.scala._
 
-class BiGGDetection (
+class BiGGDetection(
   val name: String,
   val score: Float,
   val roi: Rect,
@@ -31,5 +31,4 @@ class BiGGDetection (
   val x: Int,
   val y: Int,
   val tpl: BinarizedGradientTemplate,
-  val crt_tpl: BinarizedGradientTemplate
-) 
+  val crt_tpl: BinarizedGradientTemplate)

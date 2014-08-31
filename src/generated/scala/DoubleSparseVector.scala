@@ -29,7 +29,7 @@ package generated.scala
  * in the generated code.
  */
 
-class DoubleSparseVector(__length: Int, __isRow: Boolean) { 
+class DoubleSparseVector(__length: Int, __isRow: Boolean) {
   var _length = __length
   var _isRow = __isRow
   var _data = new Array[Double](32)
@@ -37,15 +37,15 @@ class DoubleSparseVector(__length: Int, __isRow: Boolean) {
   var _nnz = 0
 
   /**
-   * These are temporarily needed because they are hard-coded into DeliteOp code gen. 
-   */    
-  def unsafeSetData(xs: Array[Double], len: Int) = throw new UnsupportedOperationException("unsafeSetData in SparseVector not supported")  
-  
-  def Clone = { 
+   * These are temporarily needed because they are hard-coded into DeliteOp code gen.
+   */
+  def unsafeSetData(xs: Array[Double], len: Int) = throw new UnsupportedOperationException("unsafeSetData in SparseVector not supported")
+
+  def Clone = {
     val v = new DoubleSparseVector(_length, _isRow);
     v._data = _data.clone
     v._indices = _indices.clone
     v._nnz = _nnz
     v
-  }  
+  }
 }

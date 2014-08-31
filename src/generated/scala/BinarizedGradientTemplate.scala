@@ -22,8 +22,7 @@
 package generated.scala.application
 import generated.scala._
 
-
-class BinarizedGradientTemplate (
+class BinarizedGradientTemplate(
   // In the reduced image. The side of the template square is then 2*r+1.
   val radius: Int,
 
@@ -45,6 +44,5 @@ class BinarizedGradientTemplate (
 
   val templates: DenseVector[BinarizedGradientTemplate],
 
-  val hist: FloatDenseVector
-)
- 
+  val hist: FloatDenseVector)
+

@@ -29,22 +29,22 @@ package generated.scala
  * in the generated code.
  */
 
-class BooleanDenseVector(__length: Int, __isRow: Boolean) { 
+class BooleanDenseVector(__length: Int, __isRow: Boolean) {
   var _length = __length
   var _isRow = __isRow
   var _data: Array[Boolean] = new Array[Boolean](_length)
 
   /**
-   * These are temporarily needed because they are hard-coded into DeliteOp code gen. 
-   */    
+   * These are temporarily needed because they are hard-coded into DeliteOp code gen.
+   */
   def unsafeSetData(xs: Array[Boolean], len: Int) {
     _data = xs
     _length = len
   }
-  
-  def Clone = { 
+
+  def Clone = {
     val v = new BooleanDenseVector(_length, _isRow);
     v._data = _data.clone
     v
-  }  
+  }
 }

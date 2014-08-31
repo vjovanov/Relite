@@ -25,11 +25,9 @@ libraryDependencies += "stanford-ppl" %% "optiml" % "0.1-SNAPSHOT"
 
 libraryDependencies += "com.google.protobuf" % "protobuf-java" % "2.4.1"
 
-
 scalaSource in Compile <<= baseDirectory(_ / "src")
 
 scalaSource in Test <<= baseDirectory(_ / "test-src")
-
 
 retrieveManaged := true
 
@@ -42,3 +40,5 @@ unmanagedClasspath in Compile <++= baseDirectory map { base =>
 unmanagedClasspath in Test <++= (unmanagedClasspath in Compile)
 
 // unmanagedClasspath in Run <++= (unmanagedClasspath in Compile)
+
+scalariformSettings

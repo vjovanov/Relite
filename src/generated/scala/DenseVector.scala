@@ -29,22 +29,22 @@ package generated.scala
  * in the generated code.
  */
 
-class DenseVector[@specialized T: Manifest](__length: Int, __isRow: Boolean) { 
+class DenseVector[@specialized T: Manifest](__length: Int, __isRow: Boolean) {
   var _length = __length
   var _isRow = __isRow
   var _data: Array[T] = new Array[T](_length)
 
   /**
-   * These are temporarily needed because they are hard-coded into DeliteOp code gen. 
-   */    
+   * These are temporarily needed because they are hard-coded into DeliteOp code gen.
+   */
   def unsafeSetData(xs: Array[T], len: Int) {
     _data = xs
     _length = len
   }
-  
-  def Clone = { 
+
+  def Clone = {
     val v = new DenseVector[T](_length, _isRow);
     v._data = _data.clone
     v
-  }  
+  }
 }

@@ -24,9 +24,9 @@ package relite
 import r._
 import r.data._
 import r.data.internal._
-import r.builtins.{CallFactory,Primitives}
+import r.builtins.{ CallFactory, Primitives }
 import r.nodes._
-import r.nodes.truffle.{BaseR, RNode}
+import r.nodes.truffle.{ BaseR, RNode }
 import com.oracle.truffle.api.frame._;
 
 import org.antlr.runtime._
@@ -43,7 +43,7 @@ object Test3 {
 
     def test(prog: String): Unit = {
       val res = RContext.eval(RContext.parseFile(
-          new ANTLRInputStream(new ByteArrayInputStream(prog.getBytes))))
+        new ANTLRInputStream(new ByteArrayInputStream(prog.getBytes))))
 
       println(res.pretty)
     }
@@ -61,6 +61,5 @@ object Test3 {
     })
     """)
 
-    
   }
 }
