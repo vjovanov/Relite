@@ -170,6 +170,7 @@ trait Eval extends OptiMLApplication with StaticData {
             i += 1
           }
           res
+        case(D,VD) => rhs.asInstanceOf[Rep[DenseVector[Double]]] * lhs.asInstanceOf[Rep[Double]]
       }
 
     case e: Div =>
@@ -186,6 +187,16 @@ trait Eval extends OptiMLApplication with StaticData {
           val matrix = rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
           val num = lhs.asInstanceOf[Rep[Double]]
           matrix.map(a => num / a)
+        case (VM, D) =>
+                      val matrix=lhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+                      val num=rhs.asInstanceOf[Rep[Double]]
+                      val res=matrix.map(a=> a/num)
+                      res.asInstanceOf[Rep[DenseMatrix[Double]]]
+        case (VM, VM) =>
+                      val m1=lhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+                      val m2=rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+                      val res=(m1/m2).asInstanceOf[Rep[DenseMatrix[Double]]]
+                      res
       }
 
     //subtraction
@@ -430,7 +441,7 @@ trait Eval extends OptiMLApplication with StaticData {
               resultingVector
           }
 
-        //functio seq
+        //function seq
         case "seq" =>
           val arg = eval(e.getArgs.getNode(0), frame)
           val D = manifest[Double]
@@ -439,6 +450,22 @@ trait Eval extends OptiMLApplication with StaticData {
               val arg1 = cast[Double](arg)
               DenseVector.uniform(1, 1, arg1 + 1)
           }
+          
+        case "double"=> println("poziv funkcije double")
+          val num=eval(e.getArgs.getNode(0), frame)
+          val D=manifest[Double]
+          num.tpe match{
+            case D=>
+              val number=cast[Int]((cast[Double](num)).toInt)
+              val resultingVector=DenseVector.zeros(number)
+              resultingVector.pprint
+              resultingVector
+            }
+            
+        case "mean" =>
+          val v=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          (sum(v)/v.length).asInstanceOf[Rep[Double]]
+
 
         //calls of defined functions
         //not working for arguments with default values yet
