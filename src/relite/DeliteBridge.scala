@@ -62,10 +62,10 @@ trait Eval extends OptiMLApplication with StaticData {
     case v: ScalarIntImpl => unit(v.getInt(0))
     case v: ScalarDoubleImpl => unit(v.getDouble(0))
     case v: IntImpl =>
-      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Int]]]
+      val data = cast[DeliteArray[Int]](staticData(v.getContent))
       densevector_obj_fromarray(data, true)
     case v: DoubleImpl =>
-      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]]
+      val data = cast[DeliteArray[Double]](staticData(v.getContent))
       densevector_obj_fromarray(data, true)
     //representing boolean
     case v: RLogical =>
@@ -96,7 +96,7 @@ trait Eval extends OptiMLApplication with StaticData {
               env = env.updated(ex.function.paramNames()(0), x)
               val res = eval(ex.function.body.getAST, ex.enclosingFrame)
               env = env0
-              res.asInstanceOf[Rep[B]]
+              cast[B](res)
           }
       }
   }
@@ -133,10 +133,10 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       val VM = manifest[DenseMatrix[Double]]
       (lhs.tpe, rhs.tpe) match {
-        case (D, D) => lhs.asInstanceOf[Rep[Double]] + rhs.asInstanceOf[Rep[Double]]
-        case (VD, VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD, D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
-        case (VM, VM) => lhs.asInstanceOf[Rep[DenseMatrix[Double]]] + rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+        case (D, D) => cast[Double](lhs) + cast[Double](rhs)
+        case (VD, VD) => cast[DenseVector[Double]](lhs) + cast[DenseVector[Double]](rhs)
+        case (VD, D) => cast[DenseVector[Double]](lhs) + cast[Double](rhs)
+        case (VM, VM) => cast[DenseMatrix[Double]](lhs) + cast[DenseMatrix[Double]](rhs)
       }
     case e: Mult =>
       val lhs = eval(e.getLHS, frame)
@@ -145,17 +145,17 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       val VM = manifest[DenseMatrix[Double]]
       (lhs.tpe, rhs.tpe) match {
-        case (D, D) => lhs.asInstanceOf[Rep[Double]] * rhs.asInstanceOf[Rep[Double]]
+        case (D, D) => cast[Double](lhs) * cast[Double](rhs)
         case (VD, VD) =>
-          val lhs1 = lhs.asInstanceOf[Rep[DenseVector[Double]]]
-          val rhs1 = rhs.asInstanceOf[Rep[DenseVector[Double]]]
-          (lhs1.Clone * rhs1.Clone).asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD, D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[Double]]
+          val lhs1 = cast[DenseVector[Double]](lhs)
+          val rhs1 = cast[DenseVector[Double]](rhs)
+          cast[DenseVector[Double]](lhs1.Clone * rhs1.Clone)
+        case (VD, D) => cast[DenseVector[Double]](lhs) * cast[Double](rhs)
         case (VM, VM) =>
-          (rhs.asInstanceOf[Rep[DenseMatrix[Double]]] *:* lhs.asInstanceOf[Rep[DenseMatrix[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]
+          cast[DenseMatrix[Double]](cast[DenseMatrix[Double]](rhs) *:* cast[DenseMatrix[Double]](lhs))
         case (VD, VM) =>
-          val vector = lhs.asInstanceOf[Rep[DenseVector[Double]]]
-          val matrix = rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
+          val vector = cast[DenseVector[Double]](lhs)
+          val matrix = cast[DenseMatrix[Double]](rhs)
           val vectorSize = vector.length
           val matrixRows = matrix.numRows
           val matrixCols = matrix.numCols
@@ -170,7 +170,7 @@ trait Eval extends OptiMLApplication with StaticData {
             i += 1
           }
           res
-        case(D,VD) => rhs.asInstanceOf[Rep[DenseVector[Double]]] * lhs.asInstanceOf[Rep[Double]]
+        case (D, VD) => cast[DenseVector[Double]](rhs) * cast[Double](lhs)
       }
 
     case e: Div =>
@@ -180,23 +180,23 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       val VM = manifest[DenseMatrix[Double]]
       (lhs.tpe, rhs.tpe) match {
-        case (D, D) => lhs.asInstanceOf[Rep[Double]] / rhs.asInstanceOf[Rep[Double]]
-        case (VD, VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[DenseVector[Double]]]
-        case (VD, D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[Double]]
+        case (D, D) => cast[Double](lhs) / cast[Double](rhs)
+        case (VD, VD) => cast[DenseVector[Double]](lhs) / cast[DenseVector[Double]](rhs)
+        case (VD, D) => cast[DenseVector[Double]](lhs) / cast[DenseVector[Double]](rhs)
         case (D, VM) =>
-          val matrix = rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
-          val num = lhs.asInstanceOf[Rep[Double]]
+          val matrix = cast[DenseMatrix[Double]](rhs)
+          val num = cast[Double](lhs)
           matrix.map(a => num / a)
         case (VM, D) =>
-                      val matrix=lhs.asInstanceOf[Rep[DenseMatrix[Double]]]
-                      val num=rhs.asInstanceOf[Rep[Double]]
-                      val res=matrix.map(a=> a/num)
-                      res.asInstanceOf[Rep[DenseMatrix[Double]]]
+          val matrix = cast[DenseMatrix[Double]](lhs)
+          val num = cast[Double](rhs)
+          val res = matrix.map(a => a / num)
+          cast[DenseMatrix[Double]](res)
         case (VM, VM) =>
-                      val m1=lhs.asInstanceOf[Rep[DenseMatrix[Double]]]
-                      val m2=rhs.asInstanceOf[Rep[DenseMatrix[Double]]]
-                      val res=(m1/m2).asInstanceOf[Rep[DenseMatrix[Double]]]
-                      res
+          val m1 = cast[DenseMatrix[Double]](lhs)
+          val m2 = cast[DenseMatrix[Double]](rhs)
+          val res = cast[DenseMatrix[Double]](m1 / m2)
+          res
       }
 
     //subtraction
@@ -211,9 +211,9 @@ trait Eval extends OptiMLApplication with StaticData {
           val v2 = cast[Double](rhs)
           cast[Double](v1 - v2)
         case (VD, VD) =>
-          val v1 = lhs.asInstanceOf[Rep[DenseVector[Double]]]
-          val v2 = rhs.asInstanceOf[Rep[DenseVector[Double]]]
-          (v1 - v2).asInstanceOf[Rep[DenseVector[Double]]]
+          val v1 = cast[DenseVector[Double]](lhs)
+          val v2 = cast[DenseVector[Double]](rhs)
+          cast[DenseVector[Double]](v1 - v2)
       }
 
     case e: Colon =>
@@ -223,17 +223,17 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       (lhs.tpe, rhs.tpe) match {
         case (D, D) =>
-          indexvector_range(lhs.asInstanceOf[Rep[Double]].toInt, rhs.asInstanceOf[Rep[Double]].toInt + 1).toDouble
+          indexvector_range((cast[Double](lhs)).toInt, (cast[Double](rhs)).toInt + 1).toDouble
       }
 
     case e: FunctionCall =>
       e.getName.toString match {
         case "map" | "sapply" =>
-          val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          val v = cast[DenseVector[Double]](eval(e.getArgs.getNode(0), frame))
           val f = evalFun[Double, Double](e.getArgs.getNode(1), frame)
           v.map(f)
         case "sum" =>
-          val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          val v = cast[DenseVector[Double]](eval(e.getArgs.getNode(0), frame))
           v.sum
 
         //Vector creation
@@ -243,7 +243,7 @@ trait Eval extends OptiMLApplication with StaticData {
           val v1 = DenseVector[Double](e.getArgs.size(), true)
 
           for (i <- (0 until sizeVect)) {
-            v1(i) = eval(e.getArgs.getNode(i), frame).asInstanceOf[Rep[Double]]
+            v1(i) = cast[Double](eval(e.getArgs.getNode(i), frame))
           }
           v1
 
@@ -251,9 +251,9 @@ trait Eval extends OptiMLApplication with StaticData {
         case "as.vector" =>
           val myArg = eval(e.getArgs.getNode(0), frame)
           if (myArg.isInstanceOf[Rep[DenseVector[Double]]])
-            myArg.asInstanceOf[Rep[DenseVector[Double]]]
+            cast[DenseVector[Double]](myArg)
           else if (myArg.isInstanceOf[Rep[DenseMatrix[Double]]]) {
-            val matrix = myArg.asInstanceOf[Rep[DenseMatrix[Double]]]
+            val matrix = cast[DenseMatrix[Double]](myArg)
             val vectSize = matrix.numRows * matrix.numCols
             val res = DenseVector[Double](vectSize, true)
             var ii = 0
@@ -276,16 +276,16 @@ trait Eval extends OptiMLApplication with StaticData {
           val D = manifest[Double]
           arg.tpe match {
             case D =>
-              val num = arg.asInstanceOf[Rep[Double]]
+              val num = cast[Double](arg)
               sqrt(num)
             case VD =>
-              val matrix = arg.asInstanceOf[Rep[DenseMatrix[Double]]]
+              val matrix = cast[DenseMatrix[Double]](arg)
               matrix.map(a => sqrt(a))
           }
 
         //function upper.tri
         case "upper.tri" =>
-          val matrix = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val matrix = cast[DenseMatrix[Double]](eval(e.getArgs.getNode(0), frame))
           val resMatr = DenseMatrix[Boolean](matrix.numRows, matrix.numCols)
           var i = 0
           while (i < matrix.numRows) {
@@ -299,7 +299,7 @@ trait Eval extends OptiMLApplication with StaticData {
             }
             i += 1
           }
-          resMatr.asInstanceOf[Rep[DenseMatrix[Boolean]]]
+          cast[DenseMatrix[Boolean]](resMatr)
 
         //function cat
         case "cat" =>
@@ -310,7 +310,7 @@ trait Eval extends OptiMLApplication with StaticData {
 
         //function diag
         case "diag" =>
-          val matrix = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val matrix = cast[DenseMatrix[Double]](eval(e.getArgs.getNode(0), frame))
           val diagonal = DenseVector[Double](matrix.numRows, true)
           var i = 0
           while (i < matrix.numRows) {
@@ -321,8 +321,8 @@ trait Eval extends OptiMLApplication with StaticData {
 
         //function diag for assigment
         case "diag<-" =>
-          val matrix = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseMatrix[Double]]]
-          val number = eval(e.getArgs.getNode(1), frame).asInstanceOf[Rep[Double]]
+          val matrix = cast[DenseMatrix[Double]](eval(e.getArgs.getNode(0), frame))
+          val number = cast[Double](eval(e.getArgs.getNode(1), frame))
 
           val invertEnv = env.map(_.swap)
           val theKey: RSymbol = invertEnv(matrix)
@@ -352,14 +352,14 @@ trait Eval extends OptiMLApplication with StaticData {
           val arg = eval(e.getArgs.getNode(0), frame)
           val D = manifest[Double]
           (arg.tpe) match {
-            case D => ((arg.asInstanceOf[Rep[Double]])toInt).asInstanceOf[Rep[Int]]
+            case D => cast[Int]((cast[Double](arg)).toInt)
           }
 
         //function uoter
         case "outer" =>
           val args = e.getArgs
-          val v1 = eval(args.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
-          val v2 = eval(args.getNode(1), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          val v1 = cast[DenseVector[Double]](eval(args.getNode(0), frame))
+          val v2 = cast[DenseVector[Double]](eval(args.getNode(1), frame))
           val op = eval(args.getNode(2), frame)
           val VD = manifest[DenseVector[Double]]
           (v1.tpe, v2.tpe) match {
@@ -370,7 +370,7 @@ trait Eval extends OptiMLApplication with StaticData {
                 while (i < v1.length) {
                   var j = 0
                   while (j < v2.length) {
-                    res(i, j) = (v1(i) - v2(j)).asInstanceOf[Rep[Double]]
+                    res(i, j) = cast[Double](v1(i) - v2(j))
                     j += 1
                   }
                   i += 1
@@ -382,7 +382,7 @@ trait Eval extends OptiMLApplication with StaticData {
                 while (i < v1.length) {
                   var j = 0
                   while (j < v2.length) {
-                    res(i, j) = (v1(i) * v2(j)).asInstanceOf[Rep[Double]]
+                    res(i, j) = cast[Double](v1(i) * v2(j))
                     j += 1
                   }
                   i += 1
@@ -407,10 +407,13 @@ trait Eval extends OptiMLApplication with StaticData {
           val D = manifest[Double]
           val arg = eval(e.getArgs.getNode(0), frame)
           (arg.tpe) match {
-            case VD => ((arg.asInstanceOf[Rep[DenseVector[Double]]]).length).asInstanceOf[Rep[Int]]
+            case VD => cast[Int](cast[DenseVector[Double]](arg).length)
             case D =>
-              val value = arg.asInstanceOf[Rep[Double]]; ((value / value).toInt).asInstanceOf[Rep[Int]]
-            case _ => val value = arg.asInstanceOf[Rep[Double]]; ((value - value).toInt).asInstanceOf[Rep[Int]]
+              val value = cast[Double](arg)
+              cast[Int]((value / value).toInt)
+            case _ =>
+              val value = cast[Double](arg)
+              cast[Int]((value - value).toInt)
           }
 
         //function options
@@ -450,22 +453,22 @@ trait Eval extends OptiMLApplication with StaticData {
               val arg1 = cast[Double](arg)
               DenseVector.uniform(1, 1, arg1 + 1)
           }
-          
-        case "double"=> println("poziv funkcije double")
-          val num=eval(e.getArgs.getNode(0), frame)
-          val D=manifest[Double]
-          num.tpe match{
-            case D=>
-              val number=cast[Int]((cast[Double](num)).toInt)
-              val resultingVector=DenseVector.zeros(number)
+
+        case "double" =>
+          println("poziv funkcije double")
+          val num = eval(e.getArgs.getNode(0), frame)
+          val D = manifest[Double]
+          num.tpe match {
+            case D =>
+              val number = cast[Int]((cast[Double](num)).toInt)
+              val resultingVector = DenseVector.zeros(number)
               resultingVector.pprint
               resultingVector
-            }
-            
-        case "mean" =>
-          val v=eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
-          (sum(v)/v.length).asInstanceOf[Rep[Double]]
+          }
 
+        case "mean" =>
+          val v = cast[DenseVector[Double]](eval(e.getArgs.getNode(0), frame))
+          cast[Double](sum(v) / v.length)
 
         //calls of defined functions
         //not working for arguments with default values yet
@@ -487,7 +490,7 @@ trait Eval extends OptiMLApplication with StaticData {
                 env = env.updated(argNames(0), eval(arguments.getNode(i), frame))
               }
               val result = eval(functionNode.getBody, frame)
-              globalEnv.foreach(pair => currentEnv.update(pair._1, pair._2))
+              //       globalEnv.foreach(pair => currentEnv.update(pair._1, pair._2))
               env = currentEnv
               globalEnv = scala.collection.immutable.Map.empty
 
@@ -529,7 +532,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val secondVect = eval(e.getRHS, frame)
       val VD = manifest[DenseVector[Double]]
       (firstVect.tpe, secondVect.tpe) match {
-        case (VD, VD) => (firstVect.asInstanceOf[Rep[DenseVector[Double]]] ** secondVect.asInstanceOf[Rep[DenseVector[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]
+        case (VD, VD) => cast[DenseMatrix[Double]](cast[DenseVector[Double]](firstVect) ** cast[DenseVector[Double]](secondVect))
       }
 
     //matrix multiplication, just for double for now
@@ -540,11 +543,11 @@ trait Eval extends OptiMLApplication with StaticData {
       val VD = manifest[DenseVector[Double]]
       (matr1.tpe, matr2.tpe) match {
         case (VM, VM) =>
-          (matr1.asInstanceOf[Rep[DenseMatrix[Double]]] *:* matr2.asInstanceOf[Rep[DenseMatrix[Double]]]).asInstanceOf[Rep[DenseMatrix[Double]]]
+          cast[DenseMatrix[Double]](cast[DenseMatrix[Double]](matr1) *:* cast[DenseMatrix[Double]](matr2))
         case (VM, VD) =>
-          val vect = matr2.asInstanceOf[Rep[DenseVector[Double]]]
-          val matr = matr1.asInstanceOf[Rep[DenseMatrix[Double]]]
-          (matr.mapRowsToVector(row => sum(row * vect))).asInstanceOf[Rep[DenseMatrix[Double]]]
+          val vect = cast[DenseVector[Double]](matr2)
+          val matr = cast[DenseMatrix[Double]](matr1)
+          cast[DenseMatrix[Double]](matr.mapRowsToVector(row => sum(row * vect)))
       }
 
     //just for single double for now
@@ -553,7 +556,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val D = manifest[Double]
       val VD = manifest[DenseVector[Double]]
       lhs.tpe match {
-        case D => (-1 * lhs.asInstanceOf[Rep[Double]])
+        case D => (-1 * cast[Double](lhs))
       }
 
     //if node - with or without else
@@ -607,15 +610,17 @@ trait Eval extends OptiMLApplication with StaticData {
         case VD =>
           (arg.tpe) match {
             case D =>
-              val ind: Rep[Int] = arg.asInstanceOf[Rep[Int]]
-              vect.asInstanceOf[Rep[DenseVector[Double]]](ind.toInt).asInstanceOf[Rep[Double]]
+              val ind: Rep[Int] = cast[Int](arg)
+              val vector = cast[DenseVector[Double]](vect)
+              val res = vector(ind.toInt - 1)
+              cast[Double](res)
           }
-        case D => vect.asInstanceOf[Rep[Double]]
+        case D => cast[Double](vect)
         case VM =>
           (arg.tpe) match {
             case BM =>
-              val matrix = vect.asInstanceOf[Rep[DenseMatrix[Double]]]
-              val upperTriMatr = arg.asInstanceOf[Rep[DenseMatrix[Boolean]]]
+              val matrix = cast[DenseMatrix[Double]](vect)
+              val upperTriMatr = cast[DenseMatrix[Boolean]](arg)
               val rows = matrix.numRows
               val cols = matrix.numCols
               val dim = rows * cols
@@ -629,7 +634,7 @@ trait Eval extends OptiMLApplication with StaticData {
                 }
                 i += 1
               }
-              (resultVect.take(count)).asInstanceOf[Rep[DenseVector[Double]]]
+              cast[DenseVector[Double]](resultVect.take(count))
           }
       }
 
@@ -666,7 +671,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val body = e.getBody //type: ASTNode
       val envBeforeLoop = env.clone
       val counter = e.getCVar //type:RSymbol
-      val range: Rep[DenseVector[Double]] = eval(e.getRange, frame).asInstanceOf[Rep[DenseVector[Double]]] //type:ASTNode
+      val range: Rep[DenseVector[Double]] = cast[DenseVector[Double]](eval(e.getRange, frame)) //type:ASTNode
       val bodyEvaluated: Rep[Any] = unit(())
       for (currVal <- range) {
         env = env.updated(counter, currVal)
@@ -680,7 +685,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val lhs = eval(e.getLHS, frame)
       val B = manifest[Boolean]
       lhs.tpe match {
-        case B => !lhs.asInstanceOf[Rep[Boolean]]
+        case B => !cast[Boolean](lhs)
       }
 
     //elementwise and - just for simple boolean values, not vectors, for now
@@ -690,7 +695,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val B = manifest[Boolean]
       (lhs.tpe, rhs.tpe) match {
         case (B, B) =>
-          cast[Boolean](lhs.asInstanceOf[Rep[Boolean]] && rhs.asInstanceOf[Rep[Boolean]])
+          cast[Boolean](cast[Boolean](lhs) && cast[Boolean](rhs))
       }
 
     //elementwise or - just for simple boolean values, not vectors, for now
@@ -699,7 +704,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val rhs = eval(e.getRHS, frame)
       val B = manifest[Boolean]
       (lhs.tpe, rhs.tpe) match {
-        case (B, B) => lhs.asInstanceOf[Rep[Boolean]] || rhs.asInstanceOf[Rep[Boolean]]
+        case (B, B) => cast[Boolean](lhs) || cast[Boolean](rhs)
       }
 
     //integer division - just for simple values for now
@@ -708,7 +713,7 @@ trait Eval extends OptiMLApplication with StaticData {
       val rhs = eval(e.getRHS, frame)
       val D = manifest[Double]
       (lhs.tpe, rhs.tpe) match {
-        case (D, D) => (lhs.asInstanceOf[Rep[Double]] / rhs.asInstanceOf[Rep[Double]]).toInt.asInstanceOf[Rep[Int]]
+        case (D, D) => cast[Int]((cast[Double](lhs) / cast[Double](rhs)).toInt)
       }
 
     case _ =>
@@ -854,3 +859,4 @@ object DeliteBridge {
     Primitives.add(cf)
   }
 }
+
