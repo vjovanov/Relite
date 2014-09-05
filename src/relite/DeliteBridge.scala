@@ -62,10 +62,10 @@ trait Eval extends OptiMLApplication with StaticData {
     case v: ScalarIntImpl => unit(v.getInt(0))
     case v: ScalarDoubleImpl => unit(v.getDouble(0))
     case v: IntImpl =>
-      val data = (staticData(v.getContent)).as[DeliteArray[Int]]
+      val data = staticData(v.getContent).as[DeliteArray[Int]]
       densevector_obj_fromarray(data, true)
     case v: DoubleImpl =>
-      val data = (staticData(v.getContent)).as[DeliteArray[Double]]
+      val data = staticData(v.getContent).as[DeliteArray[Double]]
       densevector_obj_fromarray(data, true)
     //representing boolean
     case v: RLogical =>
