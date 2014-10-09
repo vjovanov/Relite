@@ -471,6 +471,17 @@ trait Eval extends OptiMLApplication with StaticData {
         case "mean" =>
           val v = (eval(e.getArgs.getNode(0), frame)).as[DenseVector[Double]]
           (sum(v) / v.length).as[Double]
+          
+        case "print" =>
+          val arg = e.getArgs
+          val VD = manifest[DenseVector[Double]]
+          for (i <- (0 until arg.size)) {
+            val a = eval(arg.getNode(i), frame)
+            a.tpe match {
+              case VD => (a.as[DenseVector[Double]]).pprint
+              case _ => println(a)
+            }
+          }
 
         //calls of defined functions
         //not working for arguments with default values yet
@@ -519,9 +530,6 @@ trait Eval extends OptiMLApplication with StaticData {
               case ("Vector.rand", (n: Rep[Double]) :: Nil) =>
                 assert(n.tpe == manifest[Double])
                 Vector.rand(n.toInt)
-              case ("pprint", (v: Rep[DenseVector[Double]]) :: Nil) =>
-                assert(v.tpe == manifest[DenseVector[Double]])
-                v.pprint
               case s => println("unknown f: " + s + " / " + args.mkString(","));
             }
           }
