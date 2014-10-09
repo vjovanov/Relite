@@ -35,7 +35,7 @@ import java.io._
 
 import scala.collection.JavaConversions._
 
-object MyTest1 {
+object VectorAddTest {
 
   def main(args: Array[String]): Unit = {
 
