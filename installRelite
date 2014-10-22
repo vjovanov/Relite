@@ -1,0 +1,32 @@
+#!/bin/bash
+
+cd ~
+echo "Getting Relite..."
+git clone https://github.com/relite/Relite.git
+cd Relite
+echo "Getting fastr..."
+git clone https://github.com/allr/fastr.git
+cd fastr
+ant
+echo "Getting OptiML..."
+wget "stanford-ppl.github.io/Delite/optiml/downloads/optiml-0.3.4-alpha.tgz"
+tar -xzf optiml-0.3.4-alpha.tgz
+export PATH=$PWD/optiml-0.3.4-alpha/bin:$PATH
+echo "Getting LMS..."
+git clone https://github.com/tiarkrompf/virtualization-lms-core
+cd virtualization-lms-core
+git checkout delite-develop
+git checkout b80693ddb6408c47116666f5253b777c48966509
+export LMS_HOME=`pwd`/virtualization-lms-core
+sbt publish-local
+echo "Getting Delite..."
+git clone https://github.com/stanford-ppl/delite
+export DELITE_HOME=`pwd`/delite
+cd Delite
+git checkout wip-clusters-lancet
+git checkout 32f6c245c15abe676f2251b895489b3aee2aad68
+java -Xmx2g -XX:MaxPermSize=1g -XX:ReservedCodeCacheSize=128m -jar ../sbt/bin/sbt-launch.jar publish-local	
+sbt delite-test/publish-local
+cp delite.properties.sample ../Relite/delite.properties
+
+
