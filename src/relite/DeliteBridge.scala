@@ -245,7 +245,7 @@ trait Eval extends OptiMLApplication with StaticData {
           val v1 = DenseVector[Double](e.getArgs.size(), true)
 
           for (i <- (0 until sizeVect)) {
-            v1(i) = (eval(e.getArgs.getNode(i), frame)).as[Double]
+            v1(i) = (eval(e.getArgs.getNode(i.asInstanceOf[Int]), frame)).as[Double]
           }
           v1
 
@@ -489,7 +489,7 @@ trait Eval extends OptiMLApplication with StaticData {
             if (realNrArgs == expectedNrArgs) {
               val argNames = signature.map(g => g.getName).toList
               for (i <- (0 until realNrArgs)) {
-                env = env.updated(argNames(0), eval(arguments.getNode(i), frame))
+                env = env.updated(argNames(i.asInstanceOf[Int]), eval(arguments.getNode(i.asInstanceOf[Int]), frame))
               }
               val result = eval(functionNode.getBody, frame)
               globalEnv.foreach(pair => currentEnv.update(pair._1, pair._2))
