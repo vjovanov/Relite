@@ -744,7 +744,6 @@ class EvalRunner extends MainDeliteRunner with Eval { self =>
   def infix_tpe[T](x: Rep[T]): Manifest[_] = x.tp
 
   appendTransformer(new LoopTransformer { val IR: self.type = self })
-  appendTransformer(new PrefixSumTransformer { val IR: self.type = self })
 
   val transport = new Array[Any](1)
   def setResult(x: Rep[Any]) = staticData(transport).update(0, x)
@@ -761,55 +760,6 @@ trait LoopTransformer extends ForwardPassTransformer with OptiMLCodeGenScala {
       (sym, mhs).zipped.foreach((s, p) => traverseStm(TP(s, p)))
     case _ =>
       super[ForwardPassTransformer].traverseStm(stm)
-  }
-}
-
-trait PrefixSumTransformer extends LoopTransformer {
-  val IR: MainDeliteRunner
-  import IR._
-
-  override def traverseStm(stm: Stm) = stm match {
-    case TTP(sym :: Nil, mhs, outer: AbstractFatLoop) =>
-      outer.body match {
-        case (body: DeliteCollectElem[a, i, ca]) :: Nil if body.cond.isEmpty =>
-          implicit val (ma, mi, mca) = (body.mA, body.mI, body.mCA)
-          def loopVarUsedIn(bs: List[Block[Any]], vy: Sym[Any]) =
-            getFreeVarBlock(Block(Combine(bs.map(getBlockResultFull))), vy :: Nil).contains(outer.v)
-          getBlockResult(body.func) match {
-            case Def(Forward(Def(Loop(Def(IntPlus(Const(1), outer.v)), vy, bodyr: DeliteReduceElem[a])))) if bodyr.cond.isEmpty && !loopVarUsedIn(bodyr.zero :: bodyr.func :: bodyr.rFunc :: Nil, vy) =>
-              implicit val ma = bodyr.mA
-
-              case object PrefixReduce extends DeliteOpSingleTask(reifyEffects {
-                val data = withSubstScope(body.sV -> outer.size) { reflectBlock(body.allocN) }
-                val zero = reflectBlock(bodyr.zero)
-
-                def fold(i: Rep[Int], e: Rep[a]): Rep[a] = {
-                  val a = withSubstScope(vy -> i) { reflectBlock(bodyr.func) }
-                  withSubstScope(bodyr.rV._1 -> e, bodyr.rV._2 -> a) { reflectBlock(bodyr.rFunc) }
-                }
-
-                def update(i: Rep[Int], e: Exp[a]) =
-                  withSubstScope(body.allocVal -> data, outer.v -> i, body.eV -> e) { reflectBlock(body.update) }
-
-                var i = 0
-                var acc = zero
-
-                while (i < outer.size) {
-                  val e = fold(i, readVar(acc))
-                  update(i, e)
-                  acc = e
-                  i = i + 1
-                }
-
-                withSubstScope(body.allocVal -> data) { reflectBlock(body.finalizer) }
-              })
-              subst += (sym -> reflectPure(PrefixReduce))
-            case _ =>
-          }
-        case _ =>
-      }
-    case _ =>
-      super[LoopTransformer].traverseStm(stm)
   }
 }
 
