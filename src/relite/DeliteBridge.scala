@@ -743,24 +743,9 @@ class EvalRunner extends MainDeliteRunner with Eval { self =>
 
   def infix_tpe[T](x: Rep[T]): Manifest[_] = x.tp
 
-  appendTransformer(new LoopTransformer { val IR: self.type = self })
-
   val transport = new Array[Any](1)
   def setResult(x: Rep[Any]) = staticData(transport).update(0, x)
   def getResult: AnyRef = convertBack(transport(0))
-}
-
-trait LoopTransformer extends ForwardPassTransformer with OptiMLCodeGenScala {
-  val IR: MainDeliteRunner
-  import IR._
-
-  stream = new PrintWriter(System.out)
-  override def traverseStm(stm: Stm) = stm match {
-    case TTP(sym, mhs, rhs: AbstractFatLoop) =>
-      (sym, mhs).zipped.foreach((s, p) => traverseStm(TP(s, p)))
-    case _ =>
-      super[ForwardPassTransformer].traverseStm(stm)
-  }
 }
 
 object DeliteBridge {
