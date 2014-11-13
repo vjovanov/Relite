@@ -44,10 +44,7 @@ object VectorAddTest {
     def test(prog: String): Unit = {
       val res = RContext.eval(RContext.parseFile(
         new ANTLRInputStream(new ByteArrayInputStream(prog.getBytes))))
-
-      println(res.pretty)
-      println(res)
-      // assert(res.pretty == "5, 7, 9")
+        assert(res.pretty == "5, 7, 9")
     }
 
     test("""
