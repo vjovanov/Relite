@@ -156,7 +156,7 @@ object DeliteRunner {
 
   def execTest(app: DeliteTestRunner, args: Array[String], uniqueTestName: String) = {
     println("EXECUTING...")
-    ppl.delite.runtime.profiler.PerformanceTimer.times.clear // don't print running time (messes up check file)
+  //  ppl.delite.runtime.profiler.PerformanceTimer.times.clear // don't print running time (messes up check file)
     val name = "test.tmp"
     System.setProperty("delite.runs", 1.toString)
     System.setProperty("delite.threads", threads.toString)
