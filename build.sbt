@@ -2,9 +2,7 @@ name := "relite"
 
 version := "0.1"
 
-scalaVersion := "2.10.2-RC1"
-
-//scalaBinaryVersion := "2.10.0"
+scalaVersion := "2.10.2"
 
 scalaOrganization := "org.scala-lang.virtualized"
 
@@ -15,14 +13,14 @@ parallelExecution in Test := false
 
 libraryDependencies += "org.scala-lang.virtualized" % "scala-compiler" % "2.10.0"
 
-libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
+libraryDependencies += "EPFL" %% "LMS" % "0.3-SNAPSHOT"
 
 libraryDependencies += "stanford-ppl" %% "framework" % "0.1-SNAPSHOT"
 
 libraryDependencies += "stanford-ppl" %% "runtime" % "0.1-SNAPSHOT"
 
-libraryDependencies += "stanford-ppl" %% "optiml" % "0.1-SNAPSHOT"
-
+libraryDependencies +=
+ "stanford-ppl" %% "optiml" % "0.1-SNAPSHOT"
 libraryDependencies += "com.google.protobuf" % "protobuf-java" % "2.4.1"
 
 scalaSource in Compile <<= baseDirectory(_ / "src")
