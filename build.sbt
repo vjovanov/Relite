@@ -41,3 +41,4 @@ unmanagedClasspath in Test <++= (unmanagedClasspath in Compile)
 // unmanagedClasspath in Run <++= (unmanagedClasspath in Compile)
 
 scalariformSettings
+
