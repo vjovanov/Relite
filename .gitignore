@@ -1,3 +1,6 @@
 fastr
 project/project
 target
+generated
+delite.properties
+lib_managed

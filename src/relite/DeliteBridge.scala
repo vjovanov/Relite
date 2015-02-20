@@ -740,8 +740,7 @@ trait Eval extends OptiMLApplicationCompiler with StaticData {
 }
 
 class EvalRunner extends MainDeliteRunner with Eval { self =>
-  //case class Lam[A,B](f: Rep[A]=>Rep[B]) extends Def[A=>B]
-  //override def fun[A:Manifest,B:Manifest](f: Rep[A]=>Rep[B]):Rep[A=>B] = Lam(f)
+
   def nuf[A, B](f: Rep[A => B]): Rep[A] => Rep[B] = f match { case Def(Lambda(f, _, _)) => f }
 
   def infix_tpe[T](x: Rep[T]): Manifest[_] = x.tp
@@ -768,7 +767,6 @@ object DeliteBridge {
         check(call, names, exprs)
         val expr = exprs(0)
         val ast = expr.getAST()
-
         val ast1: AnyRef = ast // apparently ASTNode member fields are reassigned -- don't make it look like one!
         new BaseR(call) {
           def execute(frame: Frame): AnyRef = {
